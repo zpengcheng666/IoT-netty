@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="coap-server" />
+        <module name="fastbee-notify-web" />
+        <module name="fastbee-open-api" />
+        <module name="fastbee-mq" />
+        <module name="fastbee-pay-core" />
+        <module name="fastbee-pay-framework" />
+        <module name="fastbee-oauth" />
+        <module name="fastbee-system-service" />
+        <module name="fastbee-protocol-base" />
+        <module name="base-server" />
+        <module name="boot-strap" />
+        <module name="http-server" />
+        <module name="fastbee-iot-data" />
+        <module name="sip-server" />
+        <module name="fastbee-admin" />
+        <module name="mqtt-broker" />
+        <module name="fastbee-common-extend" />
+        <module name="fastbee-framework" />
+        <module name="fastbee-pay-api" />
+        <module name="iot-server-core" />
+        <module name="fastbee-notify-core" />
+        <module name="fastbee-generator" />
+        <module name="fastbee-common" />
+        <module name="fastbee-mqtt-client" />
+        <module name="fastbee-protocol-collect" />
+        <module name="fastbee-oss" />
+        <module name="fastbee-quartz" />
+        <module name="fastbee-http" />
+        <module name="fastbee-iot-service" />
+        <module name="fastbee-modbus-tcp" />
+        <module name="fastbee-ruleEngine" />
+        <module name="fastbee-record" />
+      </profile>
+    </annotationProcessing>
+  </component>
+</project>
