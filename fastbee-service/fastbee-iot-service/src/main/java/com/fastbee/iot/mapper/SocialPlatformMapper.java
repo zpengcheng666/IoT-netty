@@ -1,0 +1,19 @@
+package com.fastbee.iot.mapper;
+
+import java.util.List;
+
+import com.fastbee.common.mybatis.mapper.BaseMapperX;
+import com.fastbee.iot.domain.SocialPlatform;
+import org.springframework.stereotype.Repository;
+
+/**
+ * 第三方登录平台控制Mapper接口
+ *
+ * @author kerwincui
+ * @date 2022-04-11
+ */
+@Repository
+public interface SocialPlatformMapper extends BaseMapperX<SocialPlatform>
+{
+
+}
