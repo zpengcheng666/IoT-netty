@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="06219229-4d0e-498d-91a2-517d98f4a836" name="更改" comment="">
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-    </list>
+    <list default="true" id="06219229-4d0e-498d-91a2-517d98f4a836" name="更改" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -25,9 +23,9 @@
       </MavenGeneralSettings>
     </option>
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 3
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 3
+}</component>
   <component name="ProjectId" id="2zGRTLYRGwJAXlNVwHN8B5uU0vY" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -37,7 +35,7 @@
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "D:/work/IoT-netty",
+    "last_opened_file_path": "D:/IoT-netty",
     "nodejs_package_manager_path": "npm",
     "settings.editor.selected.configurable": "MavenSettings",
     "vue.rearranger.settings.migration": "true"
@@ -76,7 +74,11 @@
       <option name="presentableId" value="Default" />
       <updated>1751355429816</updated>
       <workItem from="1751355430868" duration="29000" />
+      <workItem from="1751357060846" duration="19000" />
     </task>
     <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
   </component>
 </project>
