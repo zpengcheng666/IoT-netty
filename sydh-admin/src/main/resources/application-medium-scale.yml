@@ -1,0 +1,166 @@
+# 中规模IoT平台配置 - 适用于1万-10万设备接入
+# 特点：性能与成本平衡，适合中等规模生产环境
+
+server:
+  port: 8080
+  servlet:
+    context-path: /
+  tomcat:
+    uri-encoding: UTF-8
+    accept-count: 3000              # 适中的排队连接数
+    threads:
+      max: 800                      # 适中的Tomcat线程数
+      min-spare: 100                # 适中的最小空闲线程
+    connection-timeout: 20000       
+    max-connections: 15000          # 中规模连接数
+    
+  # MQTT Broker 中规模配置
+  broker:
+    enabled: true
+    port: 1883
+    websocket-port: 8083
+    websocket-path: /mqtt
+    keep-alive: 180                 # 适中的心跳时间
+    max-connections: 150000         # 支持15万MQTT连接
+    worker-threads: 32              # 32个Worker线程
+    business-threads: 16            # 16个业务线程
+    business-queue-size: 15000      # 15K队列大小
+    
+  # TCP服务器中规模配置  
+  tcp:
+    enabled: true
+    port: 8888
+    keep-alive: 180
+    delimiter: 0x7e
+    max-connections: 100000         # 支持10万TCP连接
+    backlog-size: 1536              # 中等backlog队列
+    worker-threads: 24              # 24个Worker线程
+    business-threads: 12            # 12个业务线程
+    business-queue-size: 10000      # 10K队列大小
+    
+  # UDP服务器配置
+  udp:
+    enabled: true
+    port: 8889
+    read-idle: 400                  # UDP保活时间
+    max-connections: 80000          # 支持8万UDP连接
+    
+  # HTTP服务器配置
+  http:
+    enabled: true
+    port: 8081
+    max-connections: 30000          # 支持3万HTTP连接
+    auth:
+      type: Digest
+      
+  # CoAP服务器配置
+  coap:
+    enabled: true
+    port: 5683
+    max-connections: 50000          # 支持5万CoAP连接
+
+  # 自适应配置
+  adaptive:
+    enabled: true                   # 启用自适应配置
+    monitor-interval: 300           # 5分钟检查一次
+    scale-threshold: 0.75           # 75%利用率时扩容
+    waste-threshold: 0.25           # 25%利用率时缩容
+
+# Spring配置优化 - 中规模
+spring:
+  profiles:
+    active: prod
+  
+  # 任务执行器优化
+  task:
+    execution:
+      pool:
+        core-size: 50               # 适中的核心线程数
+        max-size: 300               # 适中的最大线程数
+        queue-capacity: 5000        # 适中的队列容量
+        keep-alive: 120             # 线程保活时间
+        thread-name-prefix: "medium-task-"
+        
+  # 数据源连接池优化
+  datasource:
+    druid:
+      initial-size: 10              # 适中的初始连接数
+      min-idle: 10                  # 适中的最小空闲连接数
+      max-active: 100               # 适中的最大活跃连接数
+      max-wait: 60000               
+      time-between-eviction-runs-millis: 60000    
+      min-evictable-idle-time-millis: 300000      
+      validation-query: SELECT 1
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      pool-prepared-statements: true
+      max-pool-prepared-statement-per-connection-size: 20
+
+# Redis连接池优化 - 中规模
+redisson:
+  keyPrefix: sydh_iot_medium
+  threads: 16                       # 适中的Redisson线程数
+  nettyThreads: 32                  # 适中的Netty线程数
+  singleServerConfig:
+    clientName: sydh-iot-medium
+    connectionMinimumIdleSize: 32   # 适中的最小空闲连接数
+    connectionPoolSize: 128         # 适中的连接池大小
+    idleConnectionTimeout: 30000    
+    timeout: 5000                   
+    subscriptionConnectionPoolSize: 50  # 适中的订阅连接池大小
+    pingConnectionInterval: 30000   
+    
+# JVM建议配置 - 中规模
+# -Xmx4g -Xms4g                     # 堆内存4GB
+# -XX:NewRatio=3                    
+# -XX:SurvivorRatio=8              
+# -XX:+UseG1GC                     
+# -XX:MaxGCPauseMillis=150         # 适中的GC停顿时间
+# -XX:G1HeapRegionSize=16m         # 适中的G1区域大小
+
+# 系统资源要求 - 中规模
+# CPU: 8-16核
+# 内存: 16-32GB  
+# 网络: 1Gbps
+# 存储: SSD必须
+
+# 监控配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+# 日志配置优化 - 中规模
+logging:
+  level:
+    com.sydh: INFO                  
+    io.netty: WARN                  
+    root: WARN                      # 减少其他日志
+  pattern:
+    console: "%d{HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    max-size: 100MB                 # 适中的日志文件
+    max-history: 15                 # 保留15天日志
+
+# 预期性能指标 - 中规模
+# 并发连接数: 15万+ (MQTT)
+# 数据吞吐量: 2万+ QPS
+# 响应延迟: < 50ms (95%)
+# CPU使用率: < 70%
+# 内存使用率: < 75%
+
+# 成本效益分析
+# 服务器配置: 16核/32GB/SSD 约 $300-500/月
+# 支持设备数: 10万+
+# 每设备成本: $0.003-0.005/月
+# ROI: 设备数超过5万时成本效益最佳 

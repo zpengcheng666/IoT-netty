@@ -1,0 +1,251 @@
+version: '3.8'
+
+services:
+  # Redis集群节点1 - 主节点
+  redis-cluster-1:
+    image: redis:7.0-alpine
+    container_name: iot-redis-cluster-1
+    ports:
+      - "7000:7000"
+      - "17000:17000"
+    command: >
+      redis-server
+      --port 7000
+      --cluster-enabled yes
+      --cluster-config-file nodes-7000.conf
+      --cluster-node-timeout 5000
+      --cluster-announce-ip redis-cluster-1
+      --cluster-announce-port 7000
+      --cluster-announce-bus-port 17000
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 2gb
+      --maxmemory-policy allkeys-lru
+      --requirepass ${REDIS_PASSWORD:-your_redis_password}
+      --masterauth ${REDIS_PASSWORD:-your_redis_password}
+      --save 900 1 300 10 60 10000
+      --tcp-keepalive 300
+      --timeout 0
+    volumes:
+      - redis-cluster-1-data:/data
+    restart: unless-stopped
+    networks:
+      - iot-redis-network
+
+  # Redis集群节点1 - 从节点
+  redis-cluster-1-slave:
+    image: redis:7.0-alpine
+    container_name: iot-redis-cluster-1-slave
+    ports:
+      - "7001:7001"
+      - "17001:17001"
+    command: >
+      redis-server
+      --port 7001
+      --cluster-enabled yes
+      --cluster-config-file nodes-7001.conf
+      --cluster-node-timeout 5000
+      --cluster-announce-ip redis-cluster-1
+      --cluster-announce-port 7001
+      --cluster-announce-bus-port 17001
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 2gb
+      --maxmemory-policy allkeys-lru
+      --requirepass ${REDIS_PASSWORD:-your_redis_password}
+      --masterauth ${REDIS_PASSWORD:-your_redis_password}
+      --save 900 1 300 10 60 10000
+      --tcp-keepalive 300
+      --timeout 0
+    volumes:
+      - redis-cluster-1-slave-data:/data
+    restart: unless-stopped
+    networks:
+      - iot-redis-network
+
+  # Redis集群节点2 - 主节点
+  redis-cluster-2:
+    image: redis:7.0-alpine
+    container_name: iot-redis-cluster-2
+    ports:
+      - "7002:7000"
+      - "17002:17000"
+    command: >
+      redis-server
+      --port 7000
+      --cluster-enabled yes
+      --cluster-config-file nodes-7000.conf
+      --cluster-node-timeout 5000
+      --cluster-announce-ip redis-cluster-2
+      --cluster-announce-port 7000
+      --cluster-announce-bus-port 17000
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 2gb
+      --maxmemory-policy allkeys-lru
+      --requirepass ${REDIS_PASSWORD:-your_redis_password}
+      --masterauth ${REDIS_PASSWORD:-your_redis_password}
+      --save 900 1 300 10 60 10000
+      --tcp-keepalive 300
+      --timeout 0
+    volumes:
+      - redis-cluster-2-data:/data
+    restart: unless-stopped
+    networks:
+      - iot-redis-network
+
+  # Redis集群节点2 - 从节点
+  redis-cluster-2-slave:
+    image: redis:7.0-alpine
+    container_name: iot-redis-cluster-2-slave
+    ports:
+      - "7003:7001"
+      - "17003:17001"
+    command: >
+      redis-server
+      --port 7001
+      --cluster-enabled yes
+      --cluster-config-file nodes-7001.conf
+      --cluster-node-timeout 5000
+      --cluster-announce-ip redis-cluster-2
+      --cluster-announce-port 7001
+      --cluster-announce-bus-port 17001
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 2gb
+      --maxmemory-policy allkeys-lru
+      --requirepass ${REDIS_PASSWORD:-your_redis_password}
+      --masterauth ${REDIS_PASSWORD:-your_redis_password}
+      --save 900 1 300 10 60 10000
+      --tcp-keepalive 300
+      --timeout 0
+    volumes:
+      - redis-cluster-2-slave-data:/data
+    restart: unless-stopped
+    networks:
+      - iot-redis-network
+
+  # Redis集群节点3 - 主节点
+  redis-cluster-3:
+    image: redis:7.0-alpine
+    container_name: iot-redis-cluster-3
+    ports:
+      - "7004:7000"
+      - "17004:17000"
+    command: >
+      redis-server
+      --port 7000
+      --cluster-enabled yes
+      --cluster-config-file nodes-7000.conf
+      --cluster-node-timeout 5000
+      --cluster-announce-ip redis-cluster-3
+      --cluster-announce-port 7000
+      --cluster-announce-bus-port 17000
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 2gb
+      --maxmemory-policy allkeys-lru
+      --requirepass ${REDIS_PASSWORD:-your_redis_password}
+      --masterauth ${REDIS_PASSWORD:-your_redis_password}
+      --save 900 1 300 10 60 10000
+      --tcp-keepalive 300
+      --timeout 0
+    volumes:
+      - redis-cluster-3-data:/data
+    restart: unless-stopped
+    networks:
+      - iot-redis-network
+
+  # Redis集群节点3 - 从节点
+  redis-cluster-3-slave:
+    image: redis:7.0-alpine
+    container_name: iot-redis-cluster-3-slave
+    ports:
+      - "7005:7001"
+      - "17005:17001"
+    command: >
+      redis-server
+      --port 7001
+      --cluster-enabled yes
+      --cluster-config-file nodes-7001.conf
+      --cluster-node-timeout 5000
+      --cluster-announce-ip redis-cluster-3
+      --cluster-announce-port 7001
+      --cluster-announce-bus-port 17001
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 2gb
+      --maxmemory-policy allkeys-lru
+      --requirepass ${REDIS_PASSWORD:-your_redis_password}
+      --masterauth ${REDIS_PASSWORD:-your_redis_password}
+      --save 900 1 300 10 60 10000
+      --tcp-keepalive 300
+      --timeout 0
+    volumes:
+      - redis-cluster-3-slave-data:/data
+    restart: unless-stopped
+    networks:
+      - iot-redis-network
+
+  # Redis集群初始化
+  redis-cluster-init:
+    image: redis:7.0-alpine
+    container_name: redis-cluster-init
+    depends_on:
+      - redis-cluster-1
+      - redis-cluster-1-slave
+      - redis-cluster-2
+      - redis-cluster-2-slave
+      - redis-cluster-3
+      - redis-cluster-3-slave
+    entrypoint: ['/bin/sh', '-c']
+    command: |
+      "
+      echo 'Waiting for Redis nodes to start...'
+      sleep 30
+      
+      echo 'Creating Redis cluster...'
+      redis-cli -a ${REDIS_PASSWORD:-your_redis_password} --cluster create \
+        redis-cluster-1:7000 \
+        redis-cluster-2:7000 \
+        redis-cluster-3:7000 \
+        redis-cluster-1:7001 \
+        redis-cluster-2:7001 \
+        redis-cluster-3:7001 \
+        --cluster-replicas 1 \
+        --cluster-yes
+      
+      echo 'Redis cluster setup completed!'
+      
+      # 验证集群状态
+      redis-cli -a ${REDIS_PASSWORD:-your_redis_password} -h redis-cluster-1 -p 7000 cluster info
+      redis-cli -a ${REDIS_PASSWORD:-your_redis_password} -h redis-cluster-1 -p 7000 cluster nodes
+      "
+    restart: "no"
+    networks:
+      - iot-redis-network
+
+  # Redis Insight - 集群管理界面
+  redis-insight:
+    image: redislabs/redisinsight:latest
+    container_name: redis-insight
+    ports:
+      - "8001:8001"
+    volumes:
+      - redis-insight-data:/db
+    restart: unless-stopped
+    networks:
+      - iot-redis-network
+
+volumes:
+  redis-cluster-1-data:
+  redis-cluster-1-slave-data:
+  redis-cluster-2-data:
+  redis-cluster-2-slave-data:
+  redis-cluster-3-data:
+  redis-cluster-3-slave-data:
+  redis-insight-data:
+
+networks:
+  iot-redis-network:
+    driver: bridge 

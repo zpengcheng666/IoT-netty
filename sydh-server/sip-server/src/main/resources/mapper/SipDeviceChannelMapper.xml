@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sydh.sip.mapper.SipDeviceChannelMapper">
+
+    <resultMap type="com.sydh.sip.domain.SipDeviceChannel" id="SipDeviceChannelResult">
+        <result property="id" column="id"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="tenantName" column="tenant_name"/>
+        <result property="productId" column="product_id"/>
+        <result property="productName" column="product_name"/>
+        <result property="deviceSipId" column="device_sip_id"/>
+        <result property="channelSipId" column="channel_sip_id"/>
+        <result property="channelName" column="channel_name"/>
+        <result property="registerTime" column="register_time"/>
+        <result property="deviceType" column="device_type"/>
+        <result property="channelType" column="channel_type"/>
+        <result property="cityCode" column="city_code"/>
+        <result property="civilCode" column="civil_code"/>
+        <result property="manufacture" column="manufacture"/>
+        <result property="model" column="model"/>
+        <result property="owner" column="owner"/>
+        <result property="block" column="block"/>
+        <result property="address" column="address"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="ipAddress" column="ip_address"/>
+        <result property="port" column="port"/>
+        <result property="password" column="password"/>
+        <result property="ptzType" column="ptz_type"/>
+        <result property="ptzTypeText" column="ptz_type_text"/>
+        <result property="status" column="status"/>
+        <result property="longitude" column="longitude"/>
+        <result property="latitude" column="latitude"/>
+        <result property="streamId" column="stream_id"/>
+        <result property="subCount" column="sub_count"/>
+        <result property="parental" column="parental"/>
+        <result property="hasAudio" column="has_audio"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <resultMap type="com.sydh.sip.model.vo.SipDeviceChannelVO" id="SipDeviceChannelVOResult">
+        <result property="id" column="id"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="tenantName" column="tenant_name"/>
+        <result property="productId" column="product_id"/>
+        <result property="productName" column="product_name"/>
+        <result property="deviceSipId" column="device_sip_id"/>
+        <result property="channelSipId" column="channel_sip_id"/>
+        <result property="channelName" column="channel_name"/>
+        <result property="registerTime" column="register_time"/>
+        <result property="deviceType" column="device_type"/>
+        <result property="channelType" column="channel_type"/>
+        <result property="cityCode" column="city_code"/>
+        <result property="civilCode" column="civil_code"/>
+        <result property="manufacture" column="manufacture"/>
+        <result property="model" column="model"/>
+        <result property="owner" column="owner"/>
+        <result property="block" column="block"/>
+        <result property="address" column="address"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="ipAddress" column="ip_address"/>
+        <result property="port" column="port"/>
+        <result property="password" column="password"/>
+        <result property="ptzType" column="ptz_type"/>
+        <result property="ptzTypeText" column="ptz_type_text"/>
+        <result property="status" column="status"/>
+        <result property="longitude" column="longitude"/>
+        <result property="latitude" column="latitude"/>
+        <result property="streamId" column="stream_id"/>
+        <result property="subCount" column="sub_count"/>
+        <result property="parental" column="parental"/>
+        <result property="hasAudio" column="has_audio"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+        <result property="streamPush" column="stream_push"/>
+        <result property="streamRecord" column="stream_record"/>
+        <result property="videoRecord" column="vide_record"/>
+        <result property="reDeviceId" column="re_device_id"/>
+        <result property="playUrl" column="play_url"/>
+        <result property="reSceneModelId" column="re_scene_model_id"/>
+        <result property="reDeviceName" column="re_device_name"/>
+        <result property="reSceneModelName" column="re_scene_model_name"/>
+    </resultMap>
+
+    <sql id="selectSipDeviceChannelVo">
+        select id,
+               tenant_id,
+               tenant_name,
+               product_id,
+               product_name,
+               device_sip_id,
+               channel_sip_id,
+               channel_name,
+               register_time,
+               device_type,
+               channel_type,
+               city_code,
+               civil_code,
+               manufacture,
+               model,
+               owner,
+               block,
+               address,
+               parent_id,
+               ip_address,
+               port,
+               password,
+               ptz_type,
+               ptz_type_text,
+               status,
+               longitude,
+               latitude,
+               stream_id,
+               sub_count,
+               parental,
+               has_audio,
+               del_flag,
+               create_by,
+               create_time,
+               update_by,
+               update_time,
+               remark
+        from sip_device_channel
+    </sql>
+    <update id="updateSipDeviceChannel" parameterType="SipDeviceChannel">
+        update sip_device_channel
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="tenantId != null">tenant_id = #{tenantId},</if>
+            <if test="tenantName != null and tenantName != ''">tenant_name = #{tenantName},</if>
+            <if test="productId != null">product_id = #{productId},</if>
+            <if test="productName != null and productName != ''">product_name = #{productName},</if>
+            <if test="deviceSipId != null">device_sip_id = #{deviceSipId},</if>
+            <if test="channelSipId != null and channelSipId != ''">channel_sip_id = #{channelSipId},</if>
+            <if test="channelName != null and channelName != ''">channel_name = #{channelName},</if>
+            <if test="registerTime != null">register_time = #{registerTime},</if>
+            <if test="deviceType != null">device_type = #{deviceType},</if>
+            <if test="channelType != null">channel_type = #{channelType},</if>
+            <if test="cityCode != null and cityCode != ''">city_code = #{cityCode},</if>
+            <if test="civilCode != null and civilCode != ''">civil_code = #{civilCode},</if>
+            <if test="manufacture != null and manufacture != ''">manufacture = #{manufacture},</if>
+            <if test="model != null and model != ''">model = #{model},</if>
+            <if test="owner != null and owner != ''">owner = #{owner},</if>
+            <if test="block != null and block != ''">block = #{block},</if>
+            <if test="address != null and address != ''">address = #{address},</if>
+            <if test="parentId != null and parentId != ''">parent_id = #{parentId},</if>
+            <if test="ipAddress != null">ip_address = #{ipAddress},</if>
+            <if test="port != null">port = #{port},</if>
+            <if test="password != null and password != ''">password = #{password},</if>
+            <if test="ptzType != null">ptz_type = #{ptzType},</if>
+            <if test="ptzTypeText != null and ptzTypeText != ''">ptz_type_text = #{ptzTypeText},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="longitude != null">longitude = #{longitude},</if>
+            <if test="latitude != null">latitude = #{latitude},</if>
+            <if test="streamId != null and streamId != ''">stream_id = #{streamId},</if>
+            <if test="subCount != null">sub_count = #{subCount},</if>
+            <if test="parental != null">parental = #{parental},</if>
+            <if test="hasAudio != null">has_audio = #{hasAudio},</if>
+            <if test="delFlag != null and delFlag != ''">del_flag = #{delFlag},</if>
+            <if test="createBy != null and createBy != ''">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where channel_sip_id = #{channelSipId}
+    </update>
+
+    <select id="selectSipDeviceChannelByDeviceSipId" parameterType="String" resultMap="SipDeviceChannelResult">
+        <include refid="selectSipDeviceChannelVo"/>
+        where device_sip_id = #{deviceSipId} and del_flag = '0'
+    </select>
+
+    <select id="selectSipDeviceChannelByChannelSipId" parameterType="String" resultMap="SipDeviceChannelResult">
+        <include refid="selectSipDeviceChannelVo"/>
+        where channel_sip_id = #{channelSipId} and del_flag = '0'
+    </select>
+
+    <select id="selectChannelWithCivilCodeAndLength" resultMap="SipDeviceChannelResult">
+        <include refid="selectSipDeviceChannelVo"/>
+        where device_sip_id = #{deviceSipId} and del_flag = '0'
+        <if test='parentId != null and length != null' > and parent_id = #{parentId} or left(channel_sip_id, LENGTH(#{parentId})) = #{parentId} and length(channel_sip_id) = #{length} </if>
+        <if test='parentId == null and length != null' > and parent_id = #{parentId} or length(channel_sip_id) = #{length} </if>
+        <if test='parentId == null and length == null' > and parent_id = #{parentId} </if>
+        <if test='parentId != null and length == null' > and parent_id = #{parentId} or left(channel_sip_id, LENGTH(#{parentId})) = #{parentId} </if>
+    </select>
+
+    <select id="selectChannelByCivilCode" resultMap="SipDeviceChannelResult">
+        <include refid="selectSipDeviceChannelVo"/>
+        where device_sip_id = #{deviceSipId} and length(channel_sip_id)>14 and civil_code=#{parentId} and del_flag = '0'
+    </select>
+
+    <select id="selectChannelWithoutCiviCode" resultMap="SipDeviceChannelResult">
+        <include refid="selectSipDeviceChannelVo"/>
+        where device_sip_id=#{deviceSipId} and civil_code not in (select civil_code from sip_device_channel where del_flag = '0' and device_sip_id=#{deviceSipId} group by civil_code)
+    </select>
+
+    <select id="getChannelMinLength" resultType="Integer">
+        select min(length(channel_sip_id)) as minLength
+        from sip_device_channel
+        where device_sip_id = #{deviceSipId} and del_flag = '0'
+    </select>
+
+    <update id="updateChannelStreamId" parameterType="SipDeviceChannel">
+        update sip_device_channel
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="streamId != null and streamId != ''">stream_id = #{streamId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteSipDeviceChannelByDeviceId" parameterType="String">
+        update
+        sip_device_channel set del_flag = '1'
+        where device_sip_id = #{deviceSipId}
+    </delete>
+
+    <select id="getBindingChannel" resultType="com.sydh.sip.domain.BindingChannel">
+        select s.channel_sip_id as channelId,
+               d.device_id as deviceId,
+               d.device_name as deviceName,
+               m.scene_model_id as sceneModelId,
+               m.scene_model_name as sceneModelName
+        from sip_device_channel s
+        left join iot_device d on s.channel_sip_id = d.channel_id
+        left join scene_model m on m.channel_id = s.channel_sip_id
+        where s.del_flag = '0' and d.del_flag = '0' and m.del_flag = '0'
+
+    </select>
+
+    <select id="selectDeviceRelSipDeviceChannelList" resultType="com.sydh.sip.domain.SipDeviceChannel">
+        select sc.id, sr.re_device_id, sc.channel_name, sc.device_sip_id, sc.channel_sip_id, sc.status
+        from iot_device d left join iot_sip_relation sr on d.device_id = sr.re_device_id
+                          left join sip_device_channel sc on sr.channel_id = sc.channel_sip_id
+        where d.del_flag = 0
+          and sc.del_flag = 0
+          and d.serial_number = #{serialNumber}
+    </select>
+
+    <select id="selectSceneRelSipDeviceChannelList" resultType="com.sydh.sip.domain.SipDeviceChannel">
+        select sc.id, sr.re_device_id, sc.channel_name, sc.device_sip_id, sc.channel_sip_id, sc.status
+        from iot_sip_relation sr
+                 left join sip_device_channel sc on sr.channel_id = sc.channel_sip_id
+        where sc.del_flag = 0
+          and sr.re_scene_model_id = #{sceneModelId}
+    </select>
+</mapper>

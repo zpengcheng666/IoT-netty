@@ -1,0 +1,160 @@
+# 小规模IoT平台配置 - 适用于0-1万设备接入
+# 特点：资源节约型，成本优化，适合开发、测试和小规模生产环境
+
+server:
+  port: 8080
+  servlet:
+    context-path: /
+  tomcat:
+    uri-encoding: UTF-8
+    accept-count: 1000              # 适中的排队连接数
+    threads:
+      max: 200                      # 适中的Tomcat线程数
+      min-spare: 50                 # 较少的最小空闲线程
+    connection-timeout: 20000       
+    max-connections: 5000           # 小规模连接数
+    
+  # MQTT Broker 小规模配置
+  broker:
+    enabled: true
+    port: 1883
+    websocket-port: 8083
+    websocket-path: /mqtt
+    keep-alive: 120                 # 适中的心跳时间
+    max-connections: 20000          # 支持2万MQTT连接
+    worker-threads: 16              # 16个Worker线程
+    business-threads: 8             # 8个业务线程
+    business-queue-size: 5000       # 5K队列大小
+    
+  # TCP服务器小规模配置  
+  tcp:
+    enabled: true
+    port: 8888
+    keep-alive: 120
+    delimiter: 0x7e
+    max-connections: 15000          # 支持1.5万TCP连接
+    backlog-size: 512               # 小backlog队列
+    worker-threads: 12              # 12个Worker线程
+    business-threads: 6             # 6个业务线程
+    business-queue-size: 3000       # 3K队列大小
+    
+  # UDP服务器配置
+  udp:
+    enabled: true
+    port: 8889
+    read-idle: 300                  # UDP保活时间
+    max-connections: 10000          # 支持1万UDP连接
+    
+  # HTTP服务器配置
+  http:
+    enabled: true
+    port: 8081
+    max-connections: 5000           # 支持5K HTTP连接
+    auth:
+      type: Digest
+      
+  # CoAP服务器配置
+  coap:
+    enabled: true
+    port: 5683
+    max-connections: 8000           # 支持8K CoAP连接
+
+  # 自适应配置
+  adaptive:
+    enabled: true                   # 启用自适应配置
+    monitor-interval: 600           # 10分钟检查一次（较长间隔）
+    scale-threshold: 0.8            # 80%利用率时扩容
+    waste-threshold: 0.2            # 20%利用率时缩容（更激进的缩容）
+
+# Spring配置优化 - 小规模
+spring:
+  profiles:
+    active: dev
+  
+  # 任务执行器优化
+  task:
+    execution:
+      pool:
+        core-size: 20               # 较少的核心线程数
+        max-size: 100               # 较少的最大线程数
+        queue-capacity: 2000        # 较小的队列容量
+        keep-alive: 60              # 线程保活时间
+        thread-name-prefix: "small-task-"
+        
+  # 数据源连接池优化
+  datasource:
+    druid:
+      initial-size: 5               # 较少的初始连接数
+      min-idle: 5                   # 较少的最小空闲连接数
+      max-active: 50                # 较少的最大活跃连接数
+      max-wait: 60000               
+      time-between-eviction-runs-millis: 60000    
+      min-evictable-idle-time-millis: 300000      
+      validation-query: SELECT 1
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      pool-prepared-statements: true
+      max-pool-prepared-statement-per-connection-size: 20
+
+# Redis连接池优化 - 小规模
+redisson:
+  keyPrefix: sydh_iot_small
+  threads: 8                        # 较少的Redisson线程数
+  nettyThreads: 16                  # 较少的Netty线程数
+  singleServerConfig:
+    clientName: sydh-iot-small
+    connectionMinimumIdleSize: 8    # 较少的最小空闲连接数
+    connectionPoolSize: 32          # 较少的连接池大小
+    idleConnectionTimeout: 30000    
+    timeout: 5000                   
+    subscriptionConnectionPoolSize: 20  # 较少的订阅连接池大小
+    pingConnectionInterval: 30000   
+    
+# JVM建议配置 - 小规模
+# -Xmx2g -Xms2g                     # 堆内存2GB（节约资源）
+# -XX:NewRatio=3                    
+# -XX:SurvivorRatio=8              
+# -XX:+UseG1GC                     
+# -XX:MaxGCPauseMillis=100         # 较短的GC停顿时间
+# -XX:G1HeapRegionSize=8m          # 较小的G1区域大小
+
+# 系统资源要求 - 小规模
+# CPU: 4-8核
+# 内存: 8-16GB  
+# 网络: 100Mbps+
+# 存储: SSD推荐
+
+# 监控配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+# 日志配置优化 - 小规模
+logging:
+  level:
+    com.sydh: INFO                  
+    io.netty: WARN                  
+    org.springframework: WARN       # 减少Spring日志
+  pattern:
+    console: "%d{HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    max-size: 50MB                  # 较小的日志文件
+    max-history: 7                  # 保留7天日志
+
+# 预期性能指标 - 小规模
+# 并发连接数: 2万+ (MQTT)
+# 数据吞吐量: 5千+ QPS
+# 响应延迟: < 100ms (95%)
+# CPU使用率: < 60%
+# 内存使用率: < 70% 

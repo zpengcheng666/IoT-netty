@@ -1,0 +1,323 @@
+version: '3.8'
+
+services:
+  # MySQL主库 - 写操作
+  mysql-master:
+    image: mysql:8.0
+    container_name: iot-mysql-master
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-your_secure_password}
+      MYSQL_DATABASE: fastbee
+      MYSQL_USER: ${MYSQL_USER:-iot_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-your_user_password}
+      MYSQL_REPLICATION_USER: replicator
+      MYSQL_REPLICATION_PASSWORD: ${MYSQL_REPLICATION_PASSWORD:-repl_password}
+    command: >
+      --server-id=1
+      --log-bin=mysql-bin
+      --binlog-format=ROW
+      --gtid-mode=ON
+      --enforce-gtid-consistency=ON
+      --log-slave-updates=ON
+      --master-info-repository=TABLE
+      --relay-log-info-repository=TABLE
+      --binlog-checksum=NONE
+      --log-slave-updates=ON
+      --log-bin-trust-function-creators=1
+      --skip-name-resolve
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --innodb-buffer-pool-size=2G
+      --innodb-log-file-size=256M
+      --innodb-flush-log-at-trx-commit=1
+      --sync-binlog=1
+      --max-connections=1000
+      --max-connect-errors=1000
+      --table-open-cache=2000
+      --thread-cache-size=50
+      --query-cache-type=1
+      --query-cache-size=128M
+      --tmp-table-size=128M
+      --max-heap-table-size=128M
+      --slow-query-log=1
+      --slow-query-log-file=/var/log/mysql/slow.log
+      --long-query-time=2
+    volumes:
+      - mysql-master-data:/var/lib/mysql
+      - mysql-master-logs:/var/log/mysql
+      - ./mysql-init/master:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+    networks:
+      - iot-db-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # MySQL从库1 - 读操作
+  mysql-slave1:
+    image: mysql:8.0
+    container_name: iot-mysql-slave1
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-your_secure_password}
+      MYSQL_DATABASE: fastbee
+      MYSQL_USER: ${MYSQL_USER:-iot_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-your_user_password}
+    command: >
+      --server-id=2
+      --log-bin=mysql-bin
+      --binlog-format=ROW
+      --gtid-mode=ON
+      --enforce-gtid-consistency=ON
+      --log-slave-updates=ON
+      --master-info-repository=TABLE
+      --relay-log-info-repository=TABLE
+      --binlog-checksum=NONE
+      --skip-name-resolve
+      --read-only=1
+      --super-read-only=1
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --innodb-buffer-pool-size=2G
+      --innodb-log-file-size=256M
+      --max-connections=1000
+      --max-connect-errors=1000
+      --table-open-cache=2000
+      --thread-cache-size=50
+      --query-cache-type=1
+      --query-cache-size=256M
+      --tmp-table-size=128M
+      --max-heap-table-size=128M
+      --slow-query-log=1
+      --slow-query-log-file=/var/log/mysql/slow.log
+      --long-query-time=2
+    volumes:
+      - mysql-slave1-data:/var/lib/mysql
+      - mysql-slave1-logs:/var/log/mysql
+      - ./mysql-init/slave:/docker-entrypoint-initdb.d
+    depends_on:
+      mysql-master:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - iot-db-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # MySQL从库2 - 读操作
+  mysql-slave2:
+    image: mysql:8.0
+    container_name: iot-mysql-slave2
+    ports:
+      - "3308:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-your_secure_password}
+      MYSQL_DATABASE: fastbee
+      MYSQL_USER: ${MYSQL_USER:-iot_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-your_user_password}
+    command: >
+      --server-id=3
+      --log-bin=mysql-bin
+      --binlog-format=ROW
+      --gtid-mode=ON
+      --enforce-gtid-consistency=ON
+      --log-slave-updates=ON
+      --master-info-repository=TABLE
+      --relay-log-info-repository=TABLE
+      --binlog-checksum=NONE
+      --skip-name-resolve
+      --read-only=1
+      --super-read-only=1
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --innodb-buffer-pool-size=2G
+      --innodb-log-file-size=256M
+      --max-connections=1000
+      --max-connect-errors=1000
+      --table-open-cache=2000
+      --thread-cache-size=50
+      --query-cache-type=1
+      --query-cache-size=256M
+      --tmp-table-size=128M
+      --max-heap-table-size=128M
+      --slow-query-log=1
+      --slow-query-log-file=/var/log/mysql/slow.log
+      --long-query-time=2
+    volumes:
+      - mysql-slave2-data:/var/lib/mysql
+      - mysql-slave2-logs:/var/log/mysql
+      - ./mysql-init/slave:/docker-entrypoint-initdb.d
+    depends_on:
+      mysql-master:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - iot-db-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # TDengine时序数据库集群
+  tdengine-1:
+    image: tdengine/tdengine:3.0.2.0
+    container_name: iot-tdengine-1
+    ports:
+      - "6030:6030"
+      - "6041:6041"
+      - "6043:6043"
+      - "6044:6044"
+      - "6046:6046"
+      - "6047:6047"
+      - "6048:6048"
+      - "6049:6049"
+    environment:
+      TAOS_FQDN: tdengine-1
+      TAOS_FIRST_EP: tdengine-1
+      TAOS_SERVER_PORT: 6030
+      TAOS_LOG_DIR: /var/log/taos
+      TAOS_DATA_DIR: /var/lib/taos
+      TAOS_HTTP_PORT: 6041
+    volumes:
+      - tdengine-1-data:/var/lib/taos
+      - tdengine-1-logs:/var/log/taos
+      - ./tdengine-init:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+    networks:
+      - iot-db-network
+
+  # TDengine节点2
+  tdengine-2:
+    image: tdengine/tdengine:3.0.2.0
+    container_name: iot-tdengine-2
+    ports:
+      - "6130:6030"
+      - "6141:6041"
+    environment:
+      TAOS_FQDN: tdengine-2
+      TAOS_FIRST_EP: tdengine-1
+      TAOS_SERVER_PORT: 6030
+      TAOS_LOG_DIR: /var/log/taos
+      TAOS_DATA_DIR: /var/lib/taos
+      TAOS_HTTP_PORT: 6041
+    volumes:
+      - tdengine-2-data:/var/lib/taos
+      - tdengine-2-logs:/var/log/taos
+    depends_on:
+      - tdengine-1
+    restart: unless-stopped
+    networks:
+      - iot-db-network
+
+  # MySQL主从复制初始化
+  mysql-replication-setup:
+    image: mysql:8.0
+    container_name: mysql-replication-setup
+    depends_on:
+      mysql-master:
+        condition: service_healthy
+      mysql-slave1:
+        condition: service_healthy
+      mysql-slave2:
+        condition: service_healthy
+    entrypoint: ['/bin/bash', '-c']
+    command: |
+      "
+      echo 'Setting up MySQL replication...'
+      
+      # 等待所有MySQL实例就绪
+      sleep 30
+      
+      # 在主库创建复制用户
+      mysql -h mysql-master -u root -p${MYSQL_ROOT_PASSWORD:-your_secure_password} -e \"
+      CREATE USER IF NOT EXISTS 'replicator'@'%' IDENTIFIED BY '${MYSQL_REPLICATION_PASSWORD:-repl_password}';
+      GRANT REPLICATION SLAVE ON *.* TO 'replicator'@'%';
+      FLUSH PRIVILEGES;
+      \"
+      
+      # 获取主库状态
+      MASTER_STATUS=\$(mysql -h mysql-master -u root -p${MYSQL_ROOT_PASSWORD:-your_secure_password} -e \"SHOW MASTER STATUS\" --skip-column-names)
+      MASTER_FILE=\$(echo \$MASTER_STATUS | awk '{print \$1}')
+      MASTER_POS=\$(echo \$MASTER_STATUS | awk '{print \$2}')
+      
+      echo \"Master file: \$MASTER_FILE, Position: \$MASTER_POS\"
+      
+      # 配置从库1
+      mysql -h mysql-slave1 -u root -p${MYSQL_ROOT_PASSWORD:-your_secure_password} -e \"
+      STOP SLAVE;
+      CHANGE MASTER TO 
+        MASTER_HOST='mysql-master',
+        MASTER_USER='replicator',
+        MASTER_PASSWORD='${MYSQL_REPLICATION_PASSWORD:-repl_password}',
+        MASTER_LOG_FILE='\$MASTER_FILE',
+        MASTER_LOG_POS=\$MASTER_POS,
+        MASTER_AUTO_POSITION=1;
+      START SLAVE;
+      \"
+      
+      # 配置从库2
+      mysql -h mysql-slave2 -u root -p${MYSQL_ROOT_PASSWORD:-your_secure_password} -e \"
+      STOP SLAVE;
+      CHANGE MASTER TO 
+        MASTER_HOST='mysql-master',
+        MASTER_USER='replicator',
+        MASTER_PASSWORD='${MYSQL_REPLICATION_PASSWORD:-repl_password}',
+        MASTER_LOG_FILE='\$MASTER_FILE',
+        MASTER_LOG_POS=\$MASTER_POS,
+        MASTER_AUTO_POSITION=1;
+      START SLAVE;
+      \"
+      
+      echo 'MySQL replication setup completed!'
+      
+      # 验证复制状态
+      mysql -h mysql-slave1 -u root -p${MYSQL_ROOT_PASSWORD:-your_secure_password} -e \"SHOW SLAVE STATUS\\G\"
+      mysql -h mysql-slave2 -u root -p${MYSQL_ROOT_PASSWORD:-your_secure_password} -e \"SHOW SLAVE STATUS\\G\"
+      "
+    restart: "no"
+    networks:
+      - iot-db-network
+
+  # ProxySQL - 数据库代理和负载均衡
+  proxysql:
+    image: proxysql/proxysql:2.4.4
+    container_name: iot-proxysql
+    ports:
+      - "6032:6032"  # ProxySQL Admin
+      - "6033:6033"  # ProxySQL MySQL
+    volumes:
+      - ./proxysql/proxysql.cnf:/etc/proxysql.cnf
+      - proxysql-data:/var/lib/proxysql
+    depends_on:
+      - mysql-master
+      - mysql-slave1
+      - mysql-slave2
+    restart: unless-stopped
+    networks:
+      - iot-db-network
+
+volumes:
+  mysql-master-data:
+  mysql-master-logs:
+  mysql-slave1-data:
+  mysql-slave1-logs:
+  mysql-slave2-data:
+  mysql-slave2-logs:
+  tdengine-1-data:
+  tdengine-1-logs:
+  tdengine-2-data:
+  tdengine-2-logs:
+  proxysql-data:
+
+networks:
+  iot-db-network:
+    driver: bridge 

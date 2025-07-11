@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.sydh.pay</groupId>
+        <artifactId>sydh-pay</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <groupId>com.sydh.pay.core</groupId>
+    <artifactId>sydh-pay-core</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.sydh.pay.api</groupId>
+            <artifactId>sydh-pay-api</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>13.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sydh</groupId>
+            <artifactId>sydh-framework</artifactId>
+        </dependency>
+    </dependencies>
+
+</project>

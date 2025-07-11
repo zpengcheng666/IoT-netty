@@ -1,0 +1,149 @@
+# 高性能IoT平台配置 - 支持数十万设备并发接入
+# 建议在生产环境中使用此配置
+
+server:
+  port: 8080
+  servlet:
+    context-path: /
+  tomcat:
+    uri-encoding: UTF-8
+    accept-count: 5000              # 增加排队连接数
+    threads:
+      max: 2000                     # 增加Tomcat最大线程数
+      min-spare: 200                # 增加最小空闲线程数
+    connection-timeout: 20000       # 连接超时时间
+    max-connections: 20000          # 最大连接数
+    
+  # MQTT Broker 高性能配置
+  broker:
+    enabled: true
+    port: 1883
+    websocket-port: 8083
+    websocket-path: /mqtt
+    keep-alive: 300                 # 增加心跳时间，减少心跳包
+    max-connections: 500000         # 支持50万MQTT连接
+    
+  # TCP服务器高性能配置  
+  tcp:
+    enabled: true
+    port: 8888
+    keep-alive: 300
+    delimiter: 0x7e
+    max-connections: 300000         # 支持30万TCP连接
+    backlog-size: 8192              # 增加backlog队列
+    worker-threads: 64              # Worker线程数
+    business-threads: 150           # 业务线程数
+    business-queue-size: 30000      # 业务队列大小
+    
+  # UDP服务器配置
+  udp:
+    enabled: true
+    port: 8889
+    read-idle: 600                  # 增加UDP保活时间
+    max-connections: 200000         # 支持20万UDP连接
+    
+  # HTTP服务器配置
+  http:
+    enabled: true
+    port: 8081
+    max-connections: 100000         # 支持10万HTTP连接
+    auth:
+      type: Digest
+      
+  # CoAP服务器配置
+  coap:
+    enabled: true
+    port: 5683
+    max-connections: 150000         # 支持15万CoAP连接
+
+# Spring配置优化
+spring:
+  profiles:
+    active: prod
+  
+  # 任务执行器优化
+  task:
+    execution:
+      pool:
+        core-size: 100              # 增加核心线程数
+        max-size: 500               # 增加最大线程数
+        queue-capacity: 10000       # 增加队列容量
+        keep-alive: 120             # 线程保活时间
+        thread-name-prefix: "spring-task-"
+        
+  # 数据源连接池优化
+  datasource:
+    druid:
+      initial-size: 20              # 初始连接数
+      min-idle: 20                  # 最小空闲连接数
+      max-active: 200               # 最大活跃连接数
+      max-wait: 60000               # 获取连接最大等待时间
+      time-between-eviction-runs-millis: 60000    # 检测空闲连接间隔
+      min-evictable-idle-time-millis: 300000      # 最小空闲时间
+      validation-query: SELECT 1
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      pool-prepared-statements: true
+      max-pool-prepared-statement-per-connection-size: 20
+
+# Redis连接池优化
+redisson:
+  keyPrefix: sydh_iot
+  threads: 32                       # 增加Redisson线程数
+  nettyThreads: 64                  # 增加Netty线程数
+  singleServerConfig:
+    clientName: sydh-iot-cluster
+    connectionMinimumIdleSize: 64   # 增加最小空闲连接数
+    connectionPoolSize: 256         # 增加连接池大小
+    idleConnectionTimeout: 30000    # 连接空闲超时
+    timeout: 5000                   # 命令等待超时
+    subscriptionConnectionPoolSize: 100  # 增加订阅连接池大小
+    pingConnectionInterval: 30000   # 心跳检测间隔
+    
+# JVM调优建议 (在启动脚本中设置)
+# -Xmx8g -Xms8g                    # 堆内存8GB
+# -XX:NewRatio=3                   # 新生代与老年代比例
+# -XX:SurvivorRatio=8              # Eden与Survivor比例
+# -XX:+UseG1GC                     # 使用G1垃圾收集器
+# -XX:MaxGCPauseMillis=200         # 最大GC停顿时间
+# -XX:G1HeapRegionSize=16m         # G1区域大小
+# -XX:+UnlockExperimentalVMOptions
+# -XX:+UseZGC                      # 可选择ZGC (JDK11+)
+
+# 系统调优建议
+# 1. 修改系统文件描述符限制
+#    ulimit -n 1048576
+# 2. 修改系统连接数限制  
+#    echo 'net.core.somaxconn = 32768' >> /etc/sysctl.conf
+#    echo 'net.ipv4.tcp_max_syn_backlog = 16384' >> /etc/sysctl.conf
+#    echo 'net.core.netdev_max_backlog = 16384' >> /etc/sysctl.conf
+# 3. 优化TCP参数
+#    echo 'net.ipv4.tcp_fin_timeout = 30' >> /etc/sysctl.conf
+#    echo 'net.ipv4.tcp_tw_reuse = 1' >> /etc/sysctl.conf
+
+# 监控配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+# 日志配置优化
+logging:
+  level:
+    com.sydh: INFO                  # 调整日志级别，减少I/O
+    io.netty: WARN                  # Netty日志级别
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    max-size: 100MB                 # 单个日志文件最大大小
+    max-history: 30                 # 保留历史日志文件数量 

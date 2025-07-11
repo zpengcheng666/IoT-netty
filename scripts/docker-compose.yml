@@ -1,0 +1,253 @@
+version: '2'
+
+networks:
+  network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 177.7.0.0/16
+
+services:
+  redis:
+    image: redis:7.0.0
+    container_name: redis
+    ports:
+      - 6379:6379
+    privileged: true
+    networks:
+      network:
+        ipv4_address: 177.7.0.10
+    volumes:
+      - /var/data/redis:/usr/local/etc/redis
+      - /var/data/redis/conf/redis.conf:/etc/redis.conf
+      - /var/data/redis/data:/data
+    command:
+      [
+        'redis-server',
+        '/etc/redis.conf',
+        '-- requirepass admin123',
+        '-- appendonly yes'
+      ]
+
+  mysql:
+    image: mysql:5.7
+    container_name: mysql
+    ports:
+      - 3306:3306
+    privileged: true
+    networks:
+      network:
+        ipv4_address: 177.7.0.11
+    volumes:
+      - /var/data/mysql/mysql:/var/lib/mysql
+      - /var/data/mysql/mysql.cnf:/etc/mysql/conf.d/mysql.cnf
+      - /var/data/mysql/initdb:/docker-entrypoint-initdb.d
+    environment:
+      MYSQL_DATABASE: fastbee
+      MYSQL_ROOT_PASSWORD: admin123
+    command:
+      [
+        'mysqld',
+        '--character-set-server=utf8',
+        '--collation-server=utf8_unicode_ci',
+        '--default-time-zone=+8:00',
+        '--lower-case-table-names=1'
+      ]
+
+  emqx:
+    image: emqx:5.8.4
+    container_name: emqx
+    ports:
+      - 1883:1883
+      - 8083:8083
+      - 8084:8084
+      - 18083:18083
+    privileged: true
+    networks:
+      network:
+        ipv4_address: 177.7.0.12
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - /var/data/emqx/etc/emqx.conf:/opt/emqx/etc/emqx.conf
+      - /var/data/emqx/etc/acl.conf:/opt/emqx/etc/acl.conf
+      - /var/data/emqx/etc/log:/opt/emqx/log
+    environment:
+      SET_CONTAINER_TIMEZONE: "true"
+      CONTAINER_TIMEZONE: Asia/Shanghai
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    container_name: zookeeper
+    ports:
+      - 2181:2181
+    privileged: true
+    user: "1000:1000"
+    networks:
+      network:
+        ipv4_address: 177.7.0.17
+    volumes:
+      - /var/data/zookeeper/data:/var/lib/zookeeper/data
+      - /var/data/zookeeper/log:/var/lib/zookeeper/log
+      - /etc/localtime:/etc/localtime
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      TZ: Asia/Shanghai
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: kafka
+    ports:
+      - 9092:9092
+      - 29092:29092
+    privileged: true
+    user: "1000:1000"
+    networks:
+      network:
+        ipv4_address: 177.7.0.18
+    depends_on:
+      - zookeeper
+    volumes:
+      - /var/data/kafka/data:/var/lib/kafka/data
+      - /var/data/kafka/logs:/var/log/kafka
+      - /etc/localtime:/etc/localtime
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_NUM_PARTITIONS: 6
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+      TZ: Asia/Shanghai
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - 8090:8080
+    privileged: true
+    user: "1000:1000"
+    networks:
+      network:
+        ipv4_address: 177.7.0.19
+    depends_on:
+      - kafka
+      - zookeeper
+    volumes:
+      - /etc/localtime:/etc/localtime
+    environment:
+      KAFKA_CLUSTERS_0_NAME: iot-local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+      TZ: Asia/Shanghai
+
+  java:
+    image: openjdk:8-jre
+    container_name: java
+    ports:
+      - 8080:8080
+      - 8081:8081
+      - 5683:5683
+      - 5683:5683/udp
+      - 8888:8888
+      - 8889:8889/udp
+      - 5061:5061/udp
+    privileged: true
+    networks:
+      network:
+        ipv4_address: 177.7.0.13
+    depends_on:
+      - emqx
+      - redis
+      - mysql
+      - tdengine
+      - zlmedia-record
+      - kafka
+    volumes:
+      - /var/data/java/fastbee-admin.jar:/server.jar
+      - /var/data/java/license:/license
+      - /var/data/java/libtaos.so:/usr/lib/libtaos.so
+      - /var/data/java/uploadPath:/uploadPath
+      - /var/data/java/logs:/logs
+      - /etc/localtime:/etc/localtime
+    environment:
+      TZ: Asia/Shanghai
+    entrypoint: java -jar /server.jar
+
+  nginx:
+    image: nginx:stable
+    container_name: nginx
+    ports:
+      - 80:80
+      - 443:443
+    privileged: true
+    networks:
+      network:
+        ipv4_address: 177.7.0.14
+    depends_on:
+      - java
+    volumes:
+      - /var/data/nginx/vue:/usr/share/nginx/html
+      - /var/data/nginx/view:/usr/share/nginx/view
+      - /var/data/nginx/h5:/usr/share/nginx/h5
+      - /var/data/nginx/www:/usr/share/nginx/www
+      - /var/data/nginx/doc:/usr/share/nginx/doc
+      - /var/data/nginx/ssl:/usr/share/nginx/ssl
+      - /var/data/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - /var/data/nginx:/var/log/nginx
+
+  zlmedia-record:
+    image: kerwincui/zlmedia-record:2.0
+    container_name: zlmedia-record
+    privileged: true
+    restart: always
+    ports:
+      - "18081:18081"
+      - "8082:80"
+      - "8443:443"
+      - "554:554"
+      - "1935:1935"
+      - "8000:8000/tcp"
+      - "8000:8000/udp"
+      - "9000:9000/udp"
+      - "10000:10000/tcp"
+      - "10000:10000/udp"
+      - "30000-30100:30000-30100/tcp"
+      - "30000-30100:30000-30100/udp"
+    volumes:
+      - ./zlmedia/record/fastbee-record.jar:/fastbee-record.jar
+      - ./zlmedia/record/logs:/opt/assist/logs
+      - ./zlmedia/logs:/opt/media/bin/log
+      - ./zlmedia/conf/config.ini:/opt/media/conf/config.ini
+      - ./zlmedia/conf/default.pem:/opt/media/bin/default.pem
+    networks:
+      network:
+        ipv4_address: 177.7.0.15
+
+  tdengine:
+    image: 'tdengine/tdengine:3.3.5.8'
+    container_name: tdengine
+    privileged: true
+    hostname: fastbee
+    ports:
+      - 6030:6030
+      - 6041:6041
+      - 6043-6049:6043-6049
+      - 6043-6049:6043-6049/udp
+    volumes:
+      - /var/data/tdengine/log:/var/log/taos
+      - /var/data/tdengine/data:/var/lib/taos
+      - /var/data/tdengine/conf:/etc/taos
+      - /etc/localtime:/etc/localtime
+    environment:
+      TZ: Asia/Shanghai
+    networks:
+      network:
+        ipv4_address: 177.7.0.16

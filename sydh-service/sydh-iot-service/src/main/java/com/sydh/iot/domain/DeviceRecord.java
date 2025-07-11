@@ -1,0 +1,118 @@
+package com.sydh.iot.domain;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.sydh.common.core.domain.PageEntity;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.experimental.Accessors;
+
+import java.io.Serializable;
+import java.util.Date;
+
+
+/**
+ * 设备记录对象 iot_device_record
+ *
+ * @author zhuangpeng.li
+ * @date 2024-11-13
+ */
+
+@EqualsAndHashCode(callSuper = true)
+@ApiModel(value = "DeviceRecord", description = "设备记录 iot_device_record")
+@Data
+@Accessors(chain = true)
+@TableName("iot_device_record" )
+public class DeviceRecord extends PageEntity implements Serializable{
+    private static final long serialVersionUID=1L;
+
+    /** 主键id */
+    @TableId(value = "id", type = IdType.AUTO)
+    @ApiModelProperty("主键id")
+    private Long id;
+
+    /** 操作者机构id */
+    @ApiModelProperty("操作者机构id")
+    private Long operateDeptId;
+
+    /** 目标机构id */
+    @ApiModelProperty("目标机构id")
+    private Long targetDeptId;
+
+    /** 产品id */
+    @ApiModelProperty("产品id")
+    private Long productId;
+
+    /** 设备id */
+    @ApiModelProperty("设备id")
+    private Long deviceId;
+
+    /** 设备编号 */
+    @ApiModelProperty("设备编号")
+    private String serialNumber;
+
+    /** 父id */
+    @ApiModelProperty("父id")
+    private Long parentId;
+
+    /** 设备记录类型（1-导入记录；2-回收记录；3-分配记录；4-分配详细记录） */
+    @ApiModelProperty("设备记录类型")
+    private Integer type;
+
+    /** 分配类型（1-选择分配；2-导入分配） */
+    @ApiModelProperty("分配类型")
+    private Integer distributeType;
+
+    /** 总数 */
+    @ApiModelProperty("总数")
+    private Integer total;
+
+    /** 成功数量 */
+    @ApiModelProperty("成功数量")
+    private Integer successQuantity;
+
+    /** 失败数量 */
+    @ApiModelProperty("失败数量")
+    private Integer failQuantity;
+
+    /** 状态（0-失败；1-成功） */
+    @ApiModelProperty("状态")
+    private Integer status;
+
+    /** 租户id */
+    @ApiModelProperty("租户id")
+    private Long tenantId;
+
+    /** 租户名称 */
+    @ApiModelProperty("租户名称")
+    private String tenantName;
+
+    /** 创建人 */
+    @ApiModelProperty("创建人")
+    private String createBy;
+
+    /** 创建时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @ApiModelProperty("创建时间")
+    private Date createTime;
+
+    /** 更新人 */
+    @ApiModelProperty("更新人")
+    private String updateBy;
+
+    /** 更新时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @ApiModelProperty("更新时间")
+    private Date updateTime;
+
+    /** 逻辑删除标识 */
+    @ApiModelProperty("逻辑删除标识")
+    @TableLogic
+    private Integer delFlag;
+
+}

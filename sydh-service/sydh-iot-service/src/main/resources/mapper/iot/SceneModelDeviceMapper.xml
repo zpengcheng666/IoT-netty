@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sydh.iot.mapper.SceneModelDeviceMapper">
+
+    <resultMap type="SceneModelDevice" id="SceneModelDeviceResult">
+        <result property="id"    column="id"    />
+        <result property="sceneModelId"    column="scene_model_id"    />
+        <result property="cusDeviceId"    column="cus_device_id"    />
+        <result property="sort"    column="sort"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="variableType"    column="variable_type"    />
+        <result property="allEnable"    column="all_enable"    />
+        <result property="name"    column="name"    />
+    </resultMap>
+
+    <sql id="selectSceneModelDeviceVo">
+        select id, scene_model_id, cus_device_id, sort, del_flag, create_by, create_time, update_by, update_time, remark, variable_type, all_enable, name from scene_model_device
+    </sql>
+
+    <select id="checkContainAliasFormule" resultType="java.lang.Integer">
+        select count(st.id)
+        from scene_model_device s join scene_model_data smd on s.id = smd.scene_model_device_id
+                                  join scene_tag_points st on smd.id = st.scene_model_data_id
+        where s.id = #{id}
+          and s.del_flag = '0'
+          and smd.del_flag = '0'
+          and st.del_flag = '0'
+    </select>
+
+    <select id="listDeviceByProductId" resultType="com.sydh.iot.domain.SceneModelDevice">
+        select sd.id, sd.name, sd.cus_device_id, sd.scene_model_id
+        from iot_device d join scene_model_device sd on d.device_id = sd.cus_device_id
+        where d.del_flag = '0'
+          and sd.del_flag = '0'
+          and d.product_id = #{productId}
+    </select>
+
+</mapper>

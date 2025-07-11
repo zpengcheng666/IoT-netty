@@ -1,0 +1,72 @@
+package com.sydh.iot.domain;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.sydh.common.core.domain.BaseEntity;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import java.io.Serializable;
+
+
+/**
+ * 设备告警日志对象 iot_alert_log
+ *
+ * @author zhuangpeng.li
+ * @date 2024-11-12
+ */
+
+@EqualsAndHashCode(callSuper = true)
+@ApiModel(value = "AlertLog", description = "设备告警日志 iot_alert_log")
+@Data
+@TableName("iot_alert_log" )
+public class AlertLog extends BaseEntity implements Serializable{
+    private static final long serialVersionUID=1L;
+
+    /** 告警日志ID */
+    @TableId(value = "alert_log_id", type = IdType.AUTO)
+    @ApiModelProperty("告警日志ID")
+    private Long alertLogId;
+
+    /** 告警名称 */
+    @ApiModelProperty("告警名称")
+    private String alertName;
+
+    /** 告警级别（1=提醒通知，2=轻微问题，3=严重警告） */
+    @ApiModelProperty("告警级别")
+    private Long alertLevel;
+
+    /** 处理状态(1=不需要处理,2=未处理,3=已处理) */
+    @ApiModelProperty("处理状态(1=不需要处理,2=未处理,3=已处理)")
+    private Integer status;
+
+    /** 设备编号 */
+    @ApiModelProperty("设备编号")
+    private String serialNumber;
+
+    /** 产品ID */
+    @ApiModelProperty("产品ID")
+    private Long productId;
+
+    /** 告警详情（对应物模型） */
+    @ApiModelProperty("告警详情")
+    private String detail;
+
+    /** 用户id */
+    @ApiModelProperty("用户id")
+    private Long userId;
+
+    /** 设备名称 */
+    @ApiModelProperty("设备名称")
+    private String deviceName;
+
+    /**
+     * 场景id
+     */
+    @ApiModelProperty("场景id")
+    private Long sceneId;
+
+}

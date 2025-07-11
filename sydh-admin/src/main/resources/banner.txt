@@ -1,0 +1,2 @@
+Application Version: ${sydh.version}
+Spring Boot Version: ${spring-boot.version}
