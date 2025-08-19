@@ -496,6 +496,11 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         return rows;
     }
 
+    @Override
+    public boolean batchInsertUser(List<SysUser> list) {
+        return this.saveBatch(list);
+    }
+
     /**
      * 注册用户信息
      *

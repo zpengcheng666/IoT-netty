@@ -1,5 +1,6 @@
 package com.sydh.sip.handler.res;
 
+import cn.hutool.json.JSONUtil;
 import com.sydh.sip.domain.SipConfig;
 import com.sydh.sip.handler.IResHandler;
 import com.sydh.sip.model.GbSdp;
@@ -50,19 +51,25 @@ public class InviteResHandler implements InitializingBean, IResHandler {
             log.info("[InviteResHandler] {}-> {}:{}:{} ", response.getCallIdHeader().getCallId(), response.getFromTag(), response.getToTag(), response.getTopmostViaHeader().getBranch());
             FromHeader fromHeader = (FromHeader) response.getHeader(FromHeader.NAME);
             String deviceId = SipUtil.getUserIdFromFromHeader(fromHeader);
+            log.info("[InviteResHandler]deviceId:"+ deviceId);
             SipConfig sipConfig = sipConfigService.selectSipConfigBydeviceSipId(deviceId);
+            log.info("[InviteResHandler]sipConfig:"+ JSONUtil.toJsonStr(sipConfig));
             if (sipConfig == null) {
                 log.error("processMsg sipConfig is null");
                 return;
             }
             int statusCode = response.getStatusCode();
+            log.info("[InviteResHandler]statusCode:{}", statusCode);
             // 下发ack
             if (statusCode == Response.OK) {
                 ResponseEventExt event = (ResponseEventExt) evt;
                 String contentString = new String(response.getRawContent());
                 GbSdp gb28181Sdp = SipUtil.parseSDP(contentString);
                 SessionDescription sdp = gb28181Sdp.getBaseSdb();
+                String username = sdp.getOrigin().getUsername();
+                log.info("[InviteResHandler]sdp-->username:{}", username);
                 SipURI requestUri = SipFactory.getInstance().createAddressFactory().createSipURI(sdp.getOrigin().getUsername(), event.getRemoteIpAddress() + ":" + event.getRemotePort());
+//                log.info("[InviteResHandler]requestUri:{}", JSONUtil.toJsonStr(requestUri));
                 Request reqAck = headerBuilder.createAckRequest(sipConfig, response.getLocalAddress().getHostAddress(), requestUri, response);
                 log.info("[回复ack] {}-> {}:{} ", sdp.getOrigin().getUsername(), event.getRemoteIpAddress(), event.getRemotePort());
                 sipSender.transmitRequest(response.getLocalAddress().getHostAddress(), reqAck);

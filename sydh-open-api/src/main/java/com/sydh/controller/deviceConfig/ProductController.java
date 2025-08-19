@@ -52,7 +52,8 @@ public class ProductController extends BaseController
     @ApiOperation("产品分页列表")
     public TableDataInfo list(ProductVO productVO)
     {
-        SysUser user = getLoginUser().getUser();
+//        SysUser user = getLoginUser().getUser();
+        SysUser user = SecurityUtils.getLoginUser().getUser();
         if (null == user.getDeptId()) {
             productVO.setTenantId(user.getUserId());
             Page<ProductVO> voPage = productService.pageTerminalUserProduct(productVO);
@@ -62,9 +63,11 @@ public class ProductController extends BaseController
             // 默认不展示上级产品
             productVO.setShowSenior(false);
         }
-        Long deptUserId = getLoginUser().getUser().getDept().getDeptUserId();
+//        Long deptUserId = getLoginUser().getUser().getDept().getDeptUserId();
+        Long deptUserId = user.getDept().getDeptUserId();
         productVO.setIsAdmin(SecurityUtils.isAdmin(deptUserId));
-        productVO.setDeptId(getLoginUser().getDeptId());
+//        productVO.setDeptId(getLoginUser().getDeptId());
+        productVO.setDeptId(user.getDeptId());
         productVO.setTenantId(deptUserId);
         Page<ProductVO> voPage = productService.pageProductVO(productVO);
         return getDataTable(voPage.getRecords(), voPage.getTotal());
@@ -83,9 +86,11 @@ public class ProductController extends BaseController
             // 默认不展示上级产品
             productVO.setShowSenior(false);
         }
-        Long deptUserId = getLoginUser().getUser().getDept().getDeptUserId();
+        SysUser user = SecurityUtils.getLoginUser().getUser();
+//        Long deptUserId = getLoginUser().getUser().getDept().getDeptUserId();
+        Long deptUserId = user.getDept().getDeptUserId();
         productVO.setIsAdmin(SecurityUtils.isAdmin(deptUserId));
-        productVO.setDeptId(getLoginUser().getDeptId());
+        productVO.setDeptId(user.getDeptId());
         productVO.setTenantId(deptUserId);
         List<IdAndName> list = productService.selectProductShortList(productVO);
         return AjaxResult.success(list);
@@ -115,7 +120,8 @@ public class ProductController extends BaseController
     {
         Product product = productService.selectProductByProductId(productId);
         ProductVO productVO = ProductConvert.INSTANCE.convertProductVO(product);
-        Long deptUserId = getLoginUser().getUser().getDept().getDeptUserId();
+        SysUser user = SecurityUtils.getLoginUser().getUser();
+        Long deptUserId = user.getDept().getDeptUserId();
         if (!Objects.equals(product.getTenantId(), deptUserId)){
             productVO.setIsOwner(0);
         }else {
@@ -133,7 +139,8 @@ public class ProductController extends BaseController
     @ApiOperation("添加产品")
     public AjaxResult add(@RequestBody Product product)
     {
-        LoginUser loginUser = getLoginUser();
+//        LoginUser loginUser = getLoginUser();
+        LoginUser loginUser = SecurityUtils.getLoginUser();
         if (loginUser == null || loginUser.getUser() == null) {
             return error(MessageUtils.message("user.not.login"));
         }

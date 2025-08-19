@@ -10,6 +10,7 @@ import com.sydh.common.enums.BusinessType;
 import com.sydh.common.extend.core.controller.BaseController;
 import com.sydh.common.extend.core.domin.entity.SysRole;
 import com.sydh.common.extend.core.domin.model.LoginUser;
+import com.sydh.common.extend.utils.SecurityUtils;
 import com.sydh.common.extend.utils.poi.ExcelUtil;
 import com.sydh.common.utils.MessageUtils;
 import com.sydh.common.exception.ServiceException;
@@ -100,7 +101,8 @@ public class DeviceController extends BaseController {
     @GetMapping("/shortList")
     @ApiOperation("设备分页简短列表")
     public TableDataInfo shortList(DeviceVO deviceVO) {
-        LoginUser loginUser = getLoginUser();
+//        LoginUser loginUser = getLoginUser();
+        LoginUser loginUser = SecurityUtils.getLoginUser();
         if (null == loginUser.getDeptId()) {
             // 终端用户查询设备
             deviceVO.setTenantId(loginUser.getUserId());
@@ -108,7 +110,8 @@ public class DeviceController extends BaseController {
             return getDataTable(deviceShortOutputPage.getRecords(), deviceShortOutputPage.getTotal());
         }
         if (Objects.isNull(deviceVO.getTenantId())) {
-            deviceVO.setTenantId(getLoginUser().getUserId());
+//            deviceVO.setTenantId(getLoginUser().getUserId());
+            deviceVO.setTenantId(loginUser.getUserId());
         }
         Page<DeviceShortOutput> deviceShortOutputPage = deviceService.selectDeviceShortList(deviceVO);
         return getDataTable(deviceShortOutputPage.getRecords(), deviceShortOutputPage.getTotal());
@@ -147,7 +150,8 @@ public class DeviceController extends BaseController {
     public AjaxResult getInfo(@PathVariable("deviceId") Long deviceId) {
         DeviceVO deviceVO = deviceService.selectDeviceByDeviceId(deviceId);
         // 判断当前用户是否有设备分享权限 （设备所属机构管理员和设备所属用户有权限）
-        LoginUser loginUser = getLoginUser();
+//        LoginUser loginUser = getLoginUser();
+        LoginUser loginUser = SecurityUtils.getLoginUser();
         List<SysRole> roles = loginUser.getUser().getRoles();
         //判断当前用户是否为设备所属机构管理员
         if (roles.stream().anyMatch(a -> "admin".equals(a.getRoleKey()))) {

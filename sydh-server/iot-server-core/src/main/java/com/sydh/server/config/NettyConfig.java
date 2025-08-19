@@ -146,8 +146,11 @@ public class NettyConfig {
                 this.server = new UDPServer(this);
                 break;
             case MQTT:
-            case WEBSOCKET:
                 this.name = name != null ? name : ServerType.MQTT.name();
+                this.server = server;
+                this.server.config = this;
+            case WEBSOCKET:
+                this.name = name != null ? name : ServerType.WEBSOCKET.name();
                 this.server = server;
                 this.server.config = this;
                 break;

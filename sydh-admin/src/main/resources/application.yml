@@ -22,7 +22,7 @@ server:
       min-spare: 100        # Tomcat启动初始化的线程数，默认值10
   # 基于netty的服务器
   broker:
-    enabled: false           # mqttBroker类型选择, true: 基于netty的mqttBroker和webSocket  false: emq的mqttBroker
+    enabled: true           # mqttBroker类型选择, true: 基于netty的mqttBroker和webSocket  false: emq的mqttBroker
     port: 1883
     websocket-port: 8083
     websocket-path: /mqtt
@@ -64,7 +64,7 @@ server:
 spring:
   # 环境配置，dev=开发环境，prod=生产环境
   profiles:
-    active: dev               # 环境配置，dev=开发环境，prod=生产环境
+    active: dev        # 环境配置，dev=开发环境，prod=生产环境
   # 资源信息
   messages:
     # 国际化资源文件路径
@@ -104,6 +104,12 @@ spring:
       primary: master
       strict: false
       lazy: true
+  rabbitmq:
+    addresses: 192.168.88.150
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
 # 用户配置
 user:
   password:
@@ -142,7 +148,7 @@ xss:
 # redisson 配置
 redisson:
   # redis key前缀
-  keyPrefix: sql_cache
+  keyPrefix: sql_cache0
   # 线程池数量
   threads: 16
   # Netty线程池数量
@@ -212,3 +218,21 @@ liteflow:
     scriptTypeField: script_type
     scriptLanguageField: script_language
     scriptEnableField: enable
+
+sso:
+  # 用于调用基础平台oauth2相关的url  基础平台网关
+  oauth2-base-url: http://8.130.182.184:64997/admin-api/system/oauth2
+  #用于调用基础平台user相关的url 基础平台网关
+  user-base-url: http://8.130.182.184:64997/admin-api/system/oauth2/user
+  client-id: 84fb604a-a892abccfd54
+  client-secret: f8f9fc6c10f64f37a37ed73e662afbeb
+  #sso回调地址
+  redirect-uri : http://8.130.182.184:8080/sydh-iot/index.html
+  #基础平台sso接口地址
+  sso-uri : http://8.130.182.184:64997/sso
+  #基础平台首页
+  jcpt-host : 'http://8.130.182.184:8080/sydh-iot/index.html'
+  sys-name: '客户关系管理系统'
+  bpmn-base-url: http://8.130.182.184:64997/
+  logout-queue: SEND_LOGOUT_84fb604a-a892abccfd54
+  sync-user-org-flag: false

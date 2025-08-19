@@ -54,7 +54,7 @@
                 and (${thingsModelTemplateVO.params.dataScope} or m.is_sys = 1)
             </if>
         </where>
-        order by m.template_id desc, m.create_time desc
+        order by m.model_order desc
     </select>
 
     <select id="selectThingsModelTemplateByTemplateId" resultMap="ThingsModelTemplateResult">

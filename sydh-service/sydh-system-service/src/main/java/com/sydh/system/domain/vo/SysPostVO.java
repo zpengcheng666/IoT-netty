@@ -1,5 +1,6 @@
 package com.sydh.system.domain.vo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sydh.common.annotation.Excel;
 import com.sydh.common.core.domain.PageEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -46,9 +47,23 @@ public class SysPostVO extends PageEntity {
 
     /** 状态（0正常 1停用） */
     @ApiModelProperty("状态")
-    @Excel(name = "状态")
+    //@Excel(name = "状态")
     private Long status;
 
+
+    /** 状态中文描述 - Excel导出专用 */
+    @Excel(name = "状态")
+    @JsonIgnore
+    private String statusDesc;
+
+    public void setStatus(Long status) {
+        this.status = status;
+        // 同步转换中文
+        this.statusDesc = status == 0 ? "正常" : "停用";
+    }
+    public String getStatusDesc() {
+        return statusDesc;
+    }
     /** 创建者 */
     @Excel(name = "创建者")
     @ApiModelProperty("创建者")

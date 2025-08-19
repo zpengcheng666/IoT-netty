@@ -2,6 +2,7 @@ package com.sydh.bootstrap.mqtt;
 
 import com.sydh.common.enums.ServerType;
 import com.sydh.mqtt.server.MqttServer;
+import com.sydh.mqtt.server.WebSocketLogoutServer;
 import com.sydh.mqtt.server.WebSocketServer;
 import com.sydh.server.Server;
 import com.sydh.server.config.NettyConfig;

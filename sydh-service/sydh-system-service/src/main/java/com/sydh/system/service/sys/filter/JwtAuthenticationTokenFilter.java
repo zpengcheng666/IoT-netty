@@ -1,11 +1,13 @@
 package com.sydh.system.service.sys.filter;
 
+import com.sydh.common.client.OAuthClient;
 import com.sydh.common.extend.core.domin.model.LoginUser;
 import com.sydh.common.extend.utils.SecurityUtils;
 import com.sydh.common.utils.StringUtils;
 import com.sydh.system.service.sys.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -28,10 +30,20 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter
     @Autowired
     private TokenService tokenService;
 
+    @Autowired
+    private OAuthClient oAuthClient;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException
     {
+//        LoginUser loginUser = tokenService.getLoginUser(request);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            // 已有认证信息，直接放行
+            chain.doFilter(request, response);
+            return;
+        }
         LoginUser loginUser = tokenService.getLoginUser(request);
         if (StringUtils.isNotNull(loginUser) && StringUtils.isNull(SecurityUtils.getAuthentication()))
         {

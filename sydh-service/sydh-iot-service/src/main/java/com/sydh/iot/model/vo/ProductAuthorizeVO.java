@@ -1,5 +1,6 @@
 package com.sydh.iot.model.vo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sydh.common.annotation.Excel;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
@@ -57,9 +58,23 @@ public class ProductAuthorizeVO {
 
     /** 状态（1-未使用，2-使用中） */
     @ApiModelProperty("状态")
-    @Excel(name = "状态")
+    //@Excel(name = "状态")
     private Integer status;
 
+    /** 状态中文描述 - Excel导出专用 */
+    @Excel(name = "状态")
+    @JsonIgnore
+    private String statusDesc;
+
+    public void setStatus(Integer status) {
+        this.status = status;
+        // 同步转换中文
+        this.statusDesc = status == 2 ? "已使用" : "未使用";
+    }
+
+    public String getStatusDesc() {
+        return statusDesc;
+    }
     /** 创建数量 */
     @ApiModelProperty("创建数量")
     @Excel(name = "创建数量")

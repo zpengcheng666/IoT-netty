@@ -81,6 +81,13 @@ public class SipConfigServiceImpl extends ServiceImpl<SipConfigMapper,SipConfig>
             sipConfig.setDomainAlias(temp2.getDomain());
             sipConfig.setServerSipid(temp2.getId());
             sipConfig.setPassword(temp2.getPassword());
+        }else {
+            sipConfig.setEnabled(sysSipConfig.isEnabled() ? 1 : 0);
+            sipConfig.setIp(sysSipConfig.getIp());
+            sipConfig.setPort(sysSipConfig.getPort());
+            sipConfig.setDomainAlias(sysSipConfig.getDomain());
+            sipConfig.setServerSipid(sysSipConfig.getId());
+            sipConfig.setPassword(sysSipConfig.getPassword());
         }
         return sipConfig;
     }

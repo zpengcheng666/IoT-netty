@@ -1,5 +1,6 @@
 package com.sydh.sip.util;
 
+import cn.hutool.json.JSONUtil;
 import gov.nist.core.InternalErrorHandler;
 import lombok.extern.slf4j.Slf4j;
 
@@ -138,10 +139,10 @@ public class DigestAuthUtil{
      */
     public boolean doAuthenticatePlainTextPassword(Request request, String pass) {
         AuthorizationHeader authHeader = (AuthorizationHeader) request.getHeader(AuthorizationHeader.NAME);
+        log.info("[sip register]authHeader:{}", JSONUtil.toJsonStr(authHeader));
         if ( authHeader == null ) return false;
         String realm = authHeader.getRealm().trim();
         String username = authHeader.getUsername().trim();
-
         String nonce = authHeader.getNonce();
         URI uri = authHeader.getURI();
         if (uri == null) {
@@ -177,7 +178,9 @@ public class DigestAuthUtil{
         KD += ":" + HA2;
         mdbytes = messageDigest.digest(KD.getBytes());
         String mdString = toHexString(mdbytes);
+        log.info("[sip register]mdString:"+mdString);
         String response = authHeader.getResponse();
+        log.info("[sip register]response:"+response);
         return mdString.equals(response);
 
     }

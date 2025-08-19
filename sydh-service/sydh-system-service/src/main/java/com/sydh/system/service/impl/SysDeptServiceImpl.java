@@ -329,6 +329,11 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDept> impl
         return deptMapper.insert(dept);
     }
 
+    @Override
+    public boolean batchInsertDept(List<SysDept> list) {
+        return deptMapper.insertBatch(list);
+    }
+
     /**
      * 修改保存部门信息
      *

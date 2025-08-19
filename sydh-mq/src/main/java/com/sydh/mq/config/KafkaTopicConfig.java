@@ -20,8 +20,8 @@ import java.util.Map;
  * @author IoT Team
  */
 @Slf4j
-@Configuration
-@ConditionalOnProperty(name = "iot.kafka.enabled", havingValue = "true")
+//@Configuration
+//@ConditionalOnProperty(name = "iot.kafka.enabled", havingValue = "true")
 public class KafkaTopicConfig {
 
     @Value("${spring.kafka.bootstrap-servers}")

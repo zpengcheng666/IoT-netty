@@ -73,4 +73,8 @@ public class Bridge extends BaseEntity implements Serializable{
     @ApiModelProperty("租户名称")
     private String tenantName;
 
+
+    @ApiModelProperty("备注")
+    private String remark;
+
 }

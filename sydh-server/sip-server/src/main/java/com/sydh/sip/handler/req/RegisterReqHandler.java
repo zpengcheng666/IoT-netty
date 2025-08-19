@@ -1,5 +1,8 @@
 package com.sydh.sip.handler.req;
 
+import cn.hutool.json.JSON;
+import cn.hutool.json.JSONNull;
+import cn.hutool.json.JSONUtil;
 import com.sydh.common.utils.DateUtils;
 import com.sydh.iot.domain.Device;
 import com.sydh.iot.service.IDeviceService;
@@ -72,9 +75,11 @@ public class RegisterReqHandler extends ReqAbstractHandler implements Initializi
     @Override
     public void processMsg(RequestEvent evt) {
         try {
-            log.info("收到注册请求，开始处理");
+            log.info("[sip register]收到注册请求，开始处理");
             Request request = evt.getRequest();
             SIPRequest Sipreq = (SIPRequest)evt.getRequest();
+            log.info("[sip register]request:{}", JSONUtil.toJsonStr(request));
+            log.info("[sip register]Sipreq:{}", JSONUtil.toJsonStr(Sipreq));
             Response response;
             // 注册标志  0：未携带授权头或者密码错误  1：注册成功   2：注销成功
             int registerFlag;
@@ -100,6 +105,7 @@ public class RegisterReqHandler extends ReqAbstractHandler implements Initializi
 
                 boolean syscheck = new DigestAuthUtil().doAuthenticatePlainTextPassword(request,
                         sysSipConfig.getPassword());
+                log.info("[sip register]pcheck:{}, syscheck:{}", pcheck, syscheck);
                 if (!pcheck && !syscheck) {
                     // 注册失败
                     response = getMessageFactory().createResponse(Response.FORBIDDEN, request);

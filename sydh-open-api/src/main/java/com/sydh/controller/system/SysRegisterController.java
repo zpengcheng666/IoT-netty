@@ -1,6 +1,7 @@
 package com.sydh.controller.system;
 
 import com.sydh.common.core.domain.AjaxResult;
+import com.sydh.common.core.redis.RedisCache;
 import com.sydh.common.extend.core.controller.BaseController;
 import com.sydh.common.extend.core.domin.model.RegisterBody;
 import com.sydh.common.utils.MessageUtils;
@@ -9,6 +10,7 @@ import com.sydh.system.service.ISysConfigService;
 import com.sydh.system.service.sys.SysRegisterService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,6 +31,9 @@ public class SysRegisterController extends BaseController
 
     @Resource
     private ISysConfigService configService;
+
+    @Autowired
+    private RedisCache redisCache;
 
     @ApiOperation("注册账号")
     @PostMapping("/register")

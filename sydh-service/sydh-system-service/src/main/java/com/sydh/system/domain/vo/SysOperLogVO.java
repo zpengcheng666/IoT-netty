@@ -3,6 +3,7 @@ package com.sydh.system.domain.vo;
 import java.util.Date;
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sydh.common.core.domain.PageEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.sydh.common.annotation.Excel;
@@ -42,8 +43,44 @@ public class SysOperLogVO extends PageEntity {
 
     /** 业务类型（0其它 1新增 2修改 3删除） */
     @ApiModelProperty("业务类型")
-    @Excel(name = "业务类型")
+//@Excel(name = "业务类型")
     private Long businessType;
+
+    /** 状态中文描述 - Excel导出专用 */
+    @Excel(name = "业务类型")
+    @JsonIgnore
+    private String businessTypeDesc;
+
+    public void setBusinessType(Long businessType) {
+        this.businessType = businessType;
+        // 使用 switch 语句转换业务类型为中文描述
+        // 注意：Long 类型需先判断非空，否则可能出现空指针异常
+        if (businessType == null) {
+            this.businessTypeDesc = "未知"; // 空值处理
+            return;
+        }
+        switch (businessType.intValue()) {
+            case 0:
+                this.businessTypeDesc = "其它";
+                break;
+            case 1:
+                this.businessTypeDesc = "新增";
+                break;
+            case 2:
+                this.businessTypeDesc = "修改";
+                break;
+            case 3:
+                this.businessTypeDesc = "删除";
+                break;
+            default:
+                this.businessTypeDesc = "未知"; // 处理未定义的类型
+                break;
+        }
+    }
+
+    public String getBusinessTypeDesc() {
+        return businessTypeDesc;
+    }
 
     /** 方法名称 */
     @Excel(name = "方法名称")
@@ -57,8 +94,38 @@ public class SysOperLogVO extends PageEntity {
 
     /** 操作类别（0其它 1后台用户 2手机端用户） */
     @ApiModelProperty("操作类别")
-    @Excel(name = "操作类别")
+    //@Excel(name = "操作类别")
     private Long operatorType;
+
+    /** 状态中文描述 - Excel导出专用 */
+    @Excel(name = "操作类别")
+    @JsonIgnore
+    private String operatorTypeDesc;
+
+    public void setOperatorType(Long operatorType) {
+        this.operatorType = operatorType;
+            if (operatorType == null) {
+                this.operatorTypeDesc = "未知"; // 空值处理
+                return;
+            }
+            switch (operatorType.intValue()) {
+                case 0:
+                    this.operatorTypeDesc = "其它";
+                    break;
+                case 1:
+                    this.operatorTypeDesc = "后台用户";
+                    break;
+                case 2:
+                    this.operatorTypeDesc = "手机端用户";
+                    break;
+                default:
+                    this.operatorTypeDesc = "未知";
+                    break;
+            }
+    }
+    public String getOperatorTypeDesc() {
+        return operatorTypeDesc;
+    }
 
     /** 操作人员 */
     @Excel(name = "操作人员")
@@ -66,7 +133,7 @@ public class SysOperLogVO extends PageEntity {
     private String operName;
 
     /** 部门名称 */
-    @Excel(name = "部门名称")
+    //@Excel(name = "部门名称")
     @ApiModelProperty("部门名称")
     private String deptName;
 
@@ -97,8 +164,25 @@ public class SysOperLogVO extends PageEntity {
 
     /** 操作状态（0正常 1异常） */
     @ApiModelProperty("操作状态")
-    @Excel(name = "操作状态")
+    //@Excel(name = "操作状态")
     private Long status;
+
+    /** 状态中文描述 - Excel导出专用 */
+    @Excel(name = "状态")
+    @JsonIgnore
+    private String statusDesc;
+
+    public void setStatus(Long status) {
+        this.status = status;
+        // 同步转换中文
+        this.statusDesc = status == 0 ? "正常" : "异常";
+    }
+    public String getStatusDesc() {
+        return statusDesc;
+    }
+
+
+
 
     /** 错误消息 */
     @Excel(name = "错误消息")

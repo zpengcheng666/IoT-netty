@@ -1,5 +1,6 @@
 package com.sydh.iot.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
@@ -1865,9 +1866,14 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
             deviceRecord.setFailQuantity(deviceIdList.size());
         }
         deviceRecord.setCreateBy(user.getUserName());
-        int insertRecordStatus = deviceRecordMapper.insert(deviceRecord);
         List<DeviceRecord> deviceRecordList = new ArrayList<>();
         List<Device> deviceList = deviceMapper.selectDeviceListByDeviceIds(deviceIdList);
+        // todo 这点应该需要在查询一下 获取到产品id、怕报错 进行控制判断
+        if (CollectionUtil.isNotEmpty(deviceList)) {
+            deviceRecord.setProductId(deviceList.get(0).getProductId());
+            deviceRecord.setDeviceId(deviceList.get(0).getDeviceId());
+        }
+        int insertRecordStatus = deviceRecordMapper.insert(deviceRecord);
         for (Device device : deviceList) {
             DeviceRecord deviceRecord1 = new DeviceRecord();
             deviceRecord1.setOperateDeptId(user.getDeptId()).setTargetDeptId(deptId).setDeviceId(device.getDeviceId())

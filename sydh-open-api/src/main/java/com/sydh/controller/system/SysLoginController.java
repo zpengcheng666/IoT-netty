@@ -1,5 +1,6 @@
 package com.sydh.controller.system;
 
+import cn.hutool.core.bean.copier.BeanCopier;
 import com.sydh.common.constant.Constants;
 import com.sydh.common.core.domain.AjaxResult;
 import com.sydh.common.extend.core.domin.entity.SysUser;
@@ -7,14 +8,18 @@ import com.sydh.common.extend.core.domin.model.LoginBody;
 import com.sydh.common.extend.utils.SecurityUtils;
 import com.sydh.system.domain.AppPreferences;
 import com.sydh.system.domain.SysMenu;
+import com.sydh.system.domain.vo.SysUserVO;
 import com.sydh.system.service.IAppPreferencesService;
 import com.sydh.system.service.ISysMenuService;
+import com.sydh.system.service.ISysUserService;
 import com.sydh.system.service.sys.SysLoginService;
 import com.sydh.system.service.sys.SysPermissionService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,6 +46,9 @@ public class SysLoginController
 
     @Autowired
     private ISysMenuService menuService;
+
+    @Autowired
+    private ISysUserService userService;
 
     @Autowired
     private SysPermissionService permissionService;
@@ -76,6 +84,8 @@ public class SysLoginController
     @GetMapping("getInfo")
     public AjaxResult getInfo()
     {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Object principal = authentication.getPrincipal();
         SysUser user = SecurityUtils.getLoginUser().getUser();
         // 角色集合
         Set<String> roles = permissionService.getRolePermission(user);
@@ -90,6 +100,40 @@ public class SysLoginController
         ajax.put("language", appPreferences.getLanguage());
         return ajax;
     }
+
+    @ApiOperation("根据用户名获取用户信息")
+    @GetMapping("getUserInfo")
+    public AjaxResult getUserInfo(String username){
+//        SysUser user = new SysUser();
+//        user.setUserName(username);
+//        List<SysUserVO> sysUserVOS = userService.listSysUserVO(user);
+//        if(sysUserVOS.isEmpty()){
+//            return AjaxResult.error("平台没有此用户，请注册");
+//        }
+//        SysUserVO sysUserVO = sysUserVOS.get(0);
+//        SysUser sysUser = new SysUser();
+//        sysUser.setUserName(sysUserVO.getUserName());
+//        sysUser.setUserId(sysUserVO.getUserId());
+//        sysUser.setPassword(sysUserVO.getPassword());
+//        sysUser.setDept(sysUserVO.getDept());
+//        sysUser.setDeptId(sysUserVO.getDeptId());
+//        sysUser.setNickName(sysUserVO.getNickName());
+//        sysUser.setPhonenumber(sysUserVO.getPhonenumber());
+//        sysUser.setSex(sysUserVO.getSex());
+        SysUser sysUser = userService.selectUserByUserName(username);
+        Set<String> roles = permissionService.getRolePermission(sysUser);
+        // 权限集合
+        Set<String> permissions = permissionService.getMenuPermission(sysUser);
+        AppPreferences appPreferences = appPreferencesService.selectAppPreferencesByUserId(sysUser.getUserId());
+        AjaxResult ajax = AjaxResult.success();
+        ajax.put("user", sysUser);
+        ajax.put("roles", roles);
+        ajax.put("permissions", permissions);
+        ajax.put("mqtt",enabled);
+        ajax.put("language", appPreferences.getLanguage());
+        return ajax;
+    }
+
 
 
     /**

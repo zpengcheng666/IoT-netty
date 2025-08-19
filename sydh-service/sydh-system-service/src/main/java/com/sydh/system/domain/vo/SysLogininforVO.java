@@ -2,6 +2,7 @@ package com.sydh.system.domain.vo;
 
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sydh.common.core.domain.PageEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.sydh.common.annotation.Excel;
@@ -55,8 +56,24 @@ public class SysLogininforVO extends PageEntity {
 
     /** 登录状态（0成功 1失败） */
     @ApiModelProperty("登录状态")
-    @Excel(name = "登录状态")
+    //@Excel(name = "登录状态")
     private Integer status;
+
+
+    /** 状态中文描述 - Excel导出专用 */
+    @Excel(name = "登录状态")
+    @JsonIgnore
+    private String statusDesc;
+
+    public void setStatus(Integer status) {
+        this.status = status;
+        // 同步转换中文
+        this.statusDesc = status == 0 ? "成功" : "失败";
+    }
+    public String getStatusDesc() {
+        return statusDesc;
+    }
+
 
     /** 提示消息 */
     @Excel(name = "提示消息")

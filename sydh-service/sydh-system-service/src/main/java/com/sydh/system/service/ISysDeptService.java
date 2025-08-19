@@ -113,6 +113,8 @@ public interface ISysDeptService extends IService<SysDept>
      */
     public int insertDept(SysDept dept);
 
+    public boolean batchInsertDept(List<SysDept> list);
+
     /**
      * 修改保存部门信息
      *

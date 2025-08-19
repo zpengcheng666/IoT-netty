@@ -1,10 +1,12 @@
 package com.sydh.sip.server;
 
+import cn.hutool.json.JSONUtil;
 import com.sydh.common.core.redis.RedisCache;
 import com.sydh.common.core.redis.RedisKeyBuilder;
 import com.sydh.sip.enums.SessionType;
 import com.sydh.sip.model.VideoSessionInfo;
 import com.sydh.sip.util.SipUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
@@ -16,6 +18,7 @@ import java.util.Objects;
 import static java.util.Collections.emptyList;
 
 @Component
+@Slf4j
 public class VideoSessionManager {
     @Autowired
     private RedisCache redisCache;
@@ -51,11 +54,32 @@ public class VideoSessionManager {
             callId = "*";
         }
         String key = RedisKeyBuilder.buildStreamCacheKey(deviceId, channelId, stream, callId);
+        log.info("[stream cache key]key:{}", key);
         List<Object> scanResult = redisCache.scan(key);
+        log.info("[scan result]result:{}", JSONUtil.toJsonStr(scanResult));
         if (scanResult.size() == 0) {
             return null;
         }
-        return (VideoSessionInfo) redisCache.getCacheObject((String) scanResult.get(0));
+        
+        try {
+            return (VideoSessionInfo) redisCache.getCacheObject((String) scanResult.get(0));
+        } catch (ClassCastException e) {
+            // 如果类型转换失败，尝试从JSONObject转换
+            Object cachedObject = redisCache.getCacheObject((String) scanResult.get(0));
+            if (cachedObject instanceof com.alibaba.fastjson2.JSONObject) {
+                try {
+                    com.alibaba.fastjson2.JSONObject jsonObject = (com.alibaba.fastjson2.JSONObject) cachedObject;
+                    return jsonObject.toJavaObject(VideoSessionInfo.class);
+                } catch (Exception ex) {
+                    // 转换失败，删除这个无效的缓存
+                    redisCache.deleteObject((String) scanResult.get(0));
+                    return null;
+                }
+            }
+            // 其他类型转换失败，删除这个无效的缓存
+            redisCache.deleteObject((String) scanResult.get(0));
+            return null;
+        }
     }
 
     public VideoSessionInfo getSessionInfoByCallId(String callId) {
@@ -65,7 +89,25 @@ public class VideoSessionManager {
         String key = RedisKeyBuilder.buildStreamCacheKey("*", "*", "*", callId);
         List<Object> scanResult = redisCache.scan(key);
         if (!scanResult.isEmpty()) {
-            return (VideoSessionInfo) redisCache.getCacheObject((String) scanResult.get(0));
+            try {
+                return (VideoSessionInfo) redisCache.getCacheObject((String) scanResult.get(0));
+            } catch (ClassCastException e) {
+                // 如果类型转换失败，尝试从JSONObject转换
+                Object cachedObject = redisCache.getCacheObject((String) scanResult.get(0));
+                if (cachedObject instanceof com.alibaba.fastjson2.JSONObject) {
+                    try {
+                        com.alibaba.fastjson2.JSONObject jsonObject = (com.alibaba.fastjson2.JSONObject) cachedObject;
+                        return jsonObject.toJavaObject(VideoSessionInfo.class);
+                    } catch (Exception ex) {
+                        // 转换失败，删除这个无效的缓存
+                        redisCache.deleteObject((String) scanResult.get(0));
+                        return null;
+                    }
+                }
+                // 其他类型转换失败，删除这个无效的缓存
+                redisCache.deleteObject((String) scanResult.get(0));
+                return null;
+            }
         } else {
             return null;
         }
@@ -78,7 +120,25 @@ public class VideoSessionManager {
         String key = RedisKeyBuilder.buildStreamCacheKey("*", "*", SSRC, "*");
         List<Object> scanResult = redisCache.scan(key);
         if (!scanResult.isEmpty()) {
-            return (VideoSessionInfo) redisCache.getCacheObject((String) scanResult.get(0));
+            try {
+                return (VideoSessionInfo) redisCache.getCacheObject((String) scanResult.get(0));
+            } catch (ClassCastException e) {
+                // 如果类型转换失败，尝试从JSONObject转换
+                Object cachedObject = redisCache.getCacheObject((String) scanResult.get(0));
+                if (cachedObject instanceof com.alibaba.fastjson2.JSONObject) {
+                    try {
+                        com.alibaba.fastjson2.JSONObject jsonObject = (com.alibaba.fastjson2.JSONObject) cachedObject;
+                        return jsonObject.toJavaObject(VideoSessionInfo.class);
+                    } catch (Exception ex) {
+                        // 转换失败，删除这个无效的缓存
+                        redisCache.deleteObject((String) scanResult.get(0));
+                        return null;
+                    }
+                }
+                // 其他类型转换失败，删除这个无效的缓存
+                redisCache.deleteObject((String) scanResult.get(0));
+                return null;
+            }
         } else {
             return null;
         }
@@ -105,7 +165,30 @@ public class VideoSessionManager {
         }
         List<VideoSessionInfo> result = new ArrayList<>();
         for (Object keyObj : scanResult) {
-            result.add((VideoSessionInfo) redisCache.getCacheObject((String) keyObj));
+            try {
+                VideoSessionInfo sessionInfo = (VideoSessionInfo) redisCache.getCacheObject((String) keyObj);
+                if (sessionInfo != null) {
+                    result.add(sessionInfo);
+                }
+            } catch (ClassCastException e) {
+                // 如果类型转换失败，尝试从JSONObject转换
+                Object cachedObject = redisCache.getCacheObject((String) keyObj);
+                if (cachedObject instanceof com.alibaba.fastjson2.JSONObject) {
+                    try {
+                        com.alibaba.fastjson2.JSONObject jsonObject = (com.alibaba.fastjson2.JSONObject) cachedObject;
+                        VideoSessionInfo sessionInfo = jsonObject.toJavaObject(VideoSessionInfo.class);
+                        if (sessionInfo != null) {
+                            result.add(sessionInfo);
+                        }
+                    } catch (Exception ex) {
+                        // 转换失败，删除这个无效的缓存
+                        redisCache.deleteObject((String) keyObj);
+                    }
+                } else {
+                    // 其他类型转换失败，删除这个无效的缓存
+                    redisCache.deleteObject((String) keyObj);
+                }
+            }
         }
         return result;
     }
@@ -166,7 +249,30 @@ public class VideoSessionManager {
         List<VideoSessionInfo> result = new ArrayList<>();
         for (Object ssrcTransactionKey : scanResult) {
             String key = (String) ssrcTransactionKey;
-            result.add((VideoSessionInfo) redisCache.getCacheObject((String) key));
+            try {
+                VideoSessionInfo sessionInfo = (VideoSessionInfo) redisCache.getCacheObject((String) key);
+                if (sessionInfo != null) {
+                    result.add(sessionInfo);
+                }
+            } catch (ClassCastException e) {
+                // 如果类型转换失败，尝试从JSONObject转换
+                Object cachedObject = redisCache.getCacheObject((String) key);
+                if (cachedObject instanceof com.alibaba.fastjson2.JSONObject) {
+                    try {
+                        com.alibaba.fastjson2.JSONObject jsonObject = (com.alibaba.fastjson2.JSONObject) cachedObject;
+                        VideoSessionInfo sessionInfo = jsonObject.toJavaObject(VideoSessionInfo.class);
+                        if (sessionInfo != null) {
+                            result.add(sessionInfo);
+                        }
+                    } catch (Exception ex) {
+                        // 转换失败，删除这个无效的缓存
+                        redisCache.deleteObject((String) key);
+                    }
+                } else {
+                    // 其他类型转换失败，删除这个无效的缓存
+                    redisCache.deleteObject((String) key);
+                }
+            }
         }
         return result;
     }

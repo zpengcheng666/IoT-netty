@@ -102,7 +102,7 @@ public class SceneServiceImpl extends ServiceImpl<SceneMapper,Scene> implements 
      */
     @Override
     @Caching(evict = {
-            @CacheEvict(cacheNames = "Scene", key = "'selectScene:' + #scene.getSceneId()")
+            @CacheEvict(cacheNames = "Scene", key = "'selectScene:' + #sceneVO.getSceneId()")
     })
     @Transactional(rollbackFor = Exception.class)
     public int updateScene(SceneVO sceneVO) {
@@ -338,14 +338,26 @@ public class SceneServiceImpl extends ServiceImpl<SceneMapper,Scene> implements 
             queryWrapper.eq(Scene::getUserId, user.getUserId());
         }
         queryWrapper.orderByDesc(Scene::getCreateTime);
-        Page<Scene> scenePage = baseMapper.selectPage(new Page<>(scene.getPageNum(), scene.getPageSize()), queryWrapper);
-        if (0 == scenePage.getTotal()) {
+//        Page<Scene> scenePage = baseMapper.selectPage(new Page<>(scene.getPageNum(), scene.getPageSize()), queryWrapper);
+//        if (0 == scenePage.getTotal()) {
+//            return new Page<>();
+//        }
+//        Page<SceneVO> voPage = SceneConvert.INSTANCE.convertSceneVOPage(scenePage);
+//        // 过滤掉V开头的ChainName条目
+//        List<SceneVO> sceneVOList = voPage.getRecords().stream().filter(sceneVO -> !sceneVO.getChainName().startsWith("V")).collect(Collectors.toList());;
+//        voPage.setRecords(sceneVOList);
+        List<Scene> scenes = baseMapper.selectList(queryWrapper);
+//        Page<Scene> scenePage = baseMapper.selectPage(new Page<>(scene.getPageNum(), scene.getPageSize()), queryWrapper);
+        if (scenes.isEmpty()) {
             return new Page<>();
         }
-        Page<SceneVO> voPage = SceneConvert.INSTANCE.convertSceneVOPage(scenePage);
+//        Page<SceneVO> voPage = SceneConvert.INSTANCE.convertSceneVOPage(scenePage);
         // 过滤掉V开头的ChainName条目
-        List<SceneVO> sceneVOList = voPage.getRecords().stream().filter(sceneVO -> !sceneVO.getChainName().startsWith("V")).collect(Collectors.toList());;
+        List<Scene> sceneList = scenes.stream().filter(sceneVO -> !sceneVO.getChainName().startsWith("V")).collect(Collectors.toList());;
+        List<SceneVO> sceneVOList = SceneConvert.INSTANCE.convertSceneVOList(sceneList);
+        Page<SceneVO> voPage = new Page<>(scene.getPageNum(), scene.getPageSize());
         voPage.setRecords(sceneVOList);
+        voPage.setTotal(sceneVOList.size());
         List<Long> sceneIdList = sceneVOList.stream().map(SceneVO::getSceneId).collect(Collectors.toList());
         List<SceneScript> sceneScriptList = sceneScriptService.listSceneScriptByPurpose(sceneIdList, 3);
         Map<Long, List<SceneScript>> map = sceneScriptList.stream().collect(Collectors.groupingBy(SceneScript::getSceneId));

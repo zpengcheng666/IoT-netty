@@ -179,6 +179,8 @@ public interface ISysUserService extends IService<SysUser>
      */
     public int insertUser(SysUser user);
 
+    public boolean batchInsertUser(List<SysUser> list);
+
     /**
      * 注册用户信息
      *

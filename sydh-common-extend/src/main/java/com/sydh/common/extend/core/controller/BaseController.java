@@ -163,7 +163,9 @@ public class BaseController {
         Long userId = loginUser.getUserId();
         if (userId != null) {
             String userKey = CacheConstants.LOGIN_USERID_KEY + userId;
-            return redisCache.getCacheObject(userKey);
+            if (redisCache.hasKey(userKey)) {
+                return redisCache.getCacheObject(userKey);
+            }
         }
         return loginUser;
     }

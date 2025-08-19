@@ -21,6 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * @author gsb
  * @date 2022/9/15 14:23
@@ -33,6 +35,9 @@ public class WebSocketServer extends Server {
     private WebSocketMqttCodec webSocketMqttCodec;
     @Autowired
     private MqttMessageAdapter mqttMessageAdapter;
+
+    @Autowired
+    private WebSocketLogoutServer webSocketLogoutServer;
 
 
     @Override
@@ -48,7 +53,7 @@ public class WebSocketServer extends Server {
                     public void initChannel(SocketChannel ch) {
                         ch.pipeline()
                                 .addFirst(SYDHConstant.WS.HEART_BEAT
-                                        , new IdleStateHandler(0, 0, 70))
+                                        , new IdleStateHandler(60, 60, 0, TimeUnit.SECONDS))
                                 /*http请求响应*/
                                 .addLast(SYDHConstant.WS.HTTP_SERVER_CODEC, new HttpServerCodec())
                                 /*聚合header与body组成完整的Http请求，最大数据量为1Mb*/
@@ -58,6 +63,8 @@ public class WebSocketServer extends Server {
                                 /*WebSocket协议配置mqtt*/
                                 .addLast(SYDHConstant.WS.PROTOCOL, new WebSocketServerProtocolHandler("/mqtt",
                                         "mqtt,mqttv3.1,mqttv3.1.1,mqttv5.0", true, 65536))
+//                                .addLast(SYDHConstant.WS.PROTOCOL, new WebSocketServerProtocolHandler("/ws",
+//                                         true, 65536))
                                 .addLast(SYDHConstant.WS.MQTT_WEBSOCKET, webSocketMqttCodec)
                                 .addLast(SYDHConstant.WS.DECODER, new MqttDecoder())
                                 .addLast(SYDHConstant.WS.ENCODER, MqttEncoder.INSTANCE)

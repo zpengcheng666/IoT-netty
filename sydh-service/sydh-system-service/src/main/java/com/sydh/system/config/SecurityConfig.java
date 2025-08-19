@@ -1,6 +1,8 @@
 package com.sydh.system.config;
 
+import com.sydh.common.core.handler.AccessDeniedHandlerImpl;
 import com.sydh.system.service.sys.filter.JwtAuthenticationTokenFilter;
+import com.sydh.system.service.sys.filter.SingleLoginTokenFilter;
 import com.sydh.system.service.sys.handle.AuthenticationEntryPointImpl;
 import com.sydh.system.service.sys.handle.LogoutSuccessHandlerImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +17,13 @@ import org.springframework.security.config.annotation.web.configurers.Expression
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.filter.CorsFilter;
 import com.sydh.framework.config.properties.PermitAllUrlProperties;
+
+import javax.annotation.Resource;
 
 
 /**
@@ -34,6 +39,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
      */
     @Autowired
     private UserDetailsService userDetailsService;
+
+    @Resource
+    private SingleLoginTokenFilter singleLoginTokenFilter;
+
+    @Resource
+    private AccessDeniedHandlerImpl accessDeniedHandler;
 
     /**
      * 认证失败处理类
@@ -105,13 +116,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
                 .csrf().disable()
                 // 禁用HTTP响应标头
                 .headers().cacheControl().disable().and()
-                // 认证失败处理类
-                .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
                 // 基于token，所以不需要session
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .sessionManagement().sessionFixation().none().and()
                 // 过滤请求
                 .authorizeRequests()
+                .antMatchers("/sso-auth/login-by-code").permitAll()
+                .antMatchers("/sso-auth/refresh-token").permitAll()
+                .antMatchers("/sso-auth/logout").permitAll()
+                .antMatchers("/sso-auth/getProp").permitAll()
+                .antMatchers("/sso-user/get").permitAll()
+                .antMatchers("/getUserInfo").permitAll()
                 // 对于登录login 注册register 验证码captchaImage 允许匿名访问
                 .antMatchers("/login", "/register", "/captchaImage","/iot/tool/register","/iot/tool/ntp",
                         "/iot/tool/mqtt/auth","/iot/tool/mqtt/authv5","/iot/tool/mqtt/webhook","/iot/tool/mqtt/webhookv5","/auth/**/**",
@@ -145,10 +160,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
 
                 .and()
                 .headers().frameOptions().disable();
+
+        // 添加 Token Filter
+        httpSecurity.addFilterBefore(singleLoginTokenFilter, UsernamePasswordAuthenticationFilter.class);
         // 添加Logout filter
         httpSecurity.logout().logoutUrl("/logout").logoutSuccessHandler(logoutSuccessHandler);
         // 添加JWT filter
         httpSecurity.addFilterBefore(authenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
+
+        httpSecurity.exceptionHandling().accessDeniedHandler(accessDeniedHandler)
+                .authenticationEntryPoint(unauthorizedHandler);
+
         // 添加CORS filter
         httpSecurity.addFilterBefore(corsFilter, JwtAuthenticationTokenFilter.class);
         httpSecurity.addFilterBefore(corsFilter, LogoutFilter.class);
